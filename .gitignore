@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+venv/
+env/
+.env
+.venv
+
+# 诊断 / 临时脚本
+diag_token_check.py
+_build.py
+_template.html
+_inject.py
+_rows.json
+*.tmp
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# OS
+Thumbs.db
