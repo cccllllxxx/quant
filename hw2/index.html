@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>老王卖瓜：一个散户的自我修养 · HW2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ===== RESET & ROOT ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-0:#070a10; --bg-1:#0c1118; --bg-2:#111923;
+  --panel:rgba(16,24,36,0.82); --panel-warm:rgba(28,22,18,0.82);
+  --edge:rgba(0,229,255,0.14); --edge-warm:rgba(255,179,0,0.16);
+  --grid:rgba(120,160,200,0.05);
+  --text:#e8eef5; --text-dim:#8a9aae; --text-mute:#566578;
+  --cyan:#00e5ff; --amber:#ffb300; --warm-red:#e85d5d;
+  --up:#ff4d6d; --down:#25e899; --purple:#a07cff;
+  --term-color:#ffb300; --term-bg:rgba(255,179,0,0.08);
+  --shadow:0 8px 40px rgba(0,229,255,0.06);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg-0); color:var(--text);
+  font-family:"Inter","SF Pro Text","Source Han Sans SC","Microsoft YaHei","PingFang SC",sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+body{
+  min-height:100vh; background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(0,229,255,0.08), transparent 60%),
+    radial-gradient(900px 700px at 95% 5%, rgba(255,179,0,0.06), transparent 60%),
+    radial-gradient(700px 600px at 50% 100%, rgba(232,93,93,0.05), transparent 70%),
+    var(--bg-0); background-attachment:fixed;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 80%);
+  -webkit-mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 80%);
+}
+::selection{background:var(--cyan); color:#000}
+a{color:var(--cyan); text-decoration:none}
+
+/* ===== LAYOUT ===== */
+.container{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 28px}
+
+/* ===== NAV ===== */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(7,10,16,0.88); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--edge); height:52px;
+  display:flex; align-items:center; transition:opacity .3s;
+}
+.nav__inner{max-width:1180px; margin:0 auto; padding:0 28px; display:flex; align-items:center; gap:28px; width:100%}
+.nav__logo{font-size:14px; font-weight:700; color:var(--amber); white-space:nowrap}
+.nav__links{display:flex; gap:20px; font-size:12px; color:var(--text-dim)}
+.nav__links a{color:var(--text-dim); transition:color .2s}
+.nav__links a:hover{color:var(--cyan)}
+@media(max-width:680px){.nav__links{display:none}}
+
+/* ===== HERO ===== */
+.hero{position:relative; padding:120px 0 80px; border-bottom:1px solid var(--edge); overflow:hidden}
+.hero__deco{
+  position:absolute; top:40%; right:-100px; width:400px; height:400px;
+  border-radius:50%; background:radial-gradient(circle, rgba(232,93,93,0.12), transparent 70%);
+  pointer-events:none; animation:float 8s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)}}
+.hero__tag{
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11px; letter-spacing:0.3em; text-transform:uppercase; color:var(--amber);
+  padding:6px 14px; border:1px solid rgba(255,179,0,0.35); border-radius:2px;
+  background:rgba(255,179,0,0.05);
+}
+.hero__tag::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 8px var(--amber); animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)}}
+.hero__title{margin-top:28px; font-size:clamp(32px,5.5vw,56px); font-weight:800; letter-spacing:-0.02em; line-height:1.15; background:linear-gradient(180deg,#fff 0%,#a0b3c7 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+.hero__sub{margin-top:16px; font-size:clamp(16px,2.2vw,22px); color:var(--text-dim); font-weight:400}
+.hero__sub .ac{color:var(--amber)}
+.hero__desc{margin-top:24px; max-width:680px; color:var(--text-dim); font-size:14px; line-height:1.9}
+.hero__meta{margin-top:40px; display:flex; flex-wrap:wrap; gap:28px; font-size:12px; color:var(--text-mute)}
+.hero__meta .k{letter-spacing:0.16em; text-transform:uppercase}
+.hero__meta .v{color:var(--text); margin-left:6px}
+.hero__indicators{margin-top:36px; display:flex; flex-wrap:wrap; gap:10px}
+.hero__indicators span{font-size:11px; padding:4px 12px; border:1px solid var(--edge); border-radius:20px; color:var(--text-dim); background:rgba(0,229,255,0.04)}
+
+/* ===== SECTIONS ===== */
+section{padding:72px 0; border-bottom:1px solid var(--edge); position:relative}
+.sec-head{margin-bottom:48px}
+.sec-label{font-size:11px; letter-spacing:0.3em; text-transform:uppercase; color:var(--cyan); margin-bottom:12px}
+.sec-label.warm{color:var(--amber)}
+.sec-title{font-size:clamp(22px,3vw,32px); font-weight:700; color:var(--text); letter-spacing:-0.01em}
+.sec-desc{margin-top:12px; color:var(--text-dim); font-size:14px; max-width:720px}
+
+/* ===== STORY CARDS ===== */
+.story-card{
+  background:var(--panel-warm); border:1px solid var(--edge-warm); border-radius:12px;
+  padding:36px 36px; margin-bottom:28px; position:relative; overflow:hidden;
+  transition:border-color .3s, box-shadow .3s;
+}
+.story-card:hover{border-color:rgba(255,179,0,0.3); box-shadow:0 8px 40px rgba(255,179,0,0.06)}
+.story-card::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg, var(--amber), transparent);
+}
+.story-card__chap{font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:var(--amber); margin-bottom:8px}
+.story-card__title{font-size:22px; font-weight:700; color:var(--text); margin-bottom:20px}
+.story-card__body{color:var(--text-dim); font-size:15px; line-height:2.0}
+.story-card__body p{margin-bottom:14px}
+.story-card__body strong{color:var(--text)}
+.story-card__body .highlight{color:var(--amber); font-weight:600}
+.story-card__body .red{color:var(--up)}
+.story-card__body .green{color:var(--down)}
+.story-card__note{
+  margin-top:24px; padding:20px; background:rgba(255,179,0,0.05);
+  border:1px solid rgba(255,179,0,0.12); border-radius:8px;
+}
+.story-card__note .note-label{font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--amber); margin-bottom:8px}
+.story-card__note .note-body{color:var(--text-dim); font-size:13px; line-height:1.8}
+.story-card__note .formula{font-family:"JetBrains Mono","SF Mono",Consolas,monospace; color:var(--cyan); font-size:13px; margin:8px 0; padding:8px 12px; background:rgba(0,229,255,0.06); border-radius:4px; border:1px solid rgba(0,229,255,0.1)}
+.story-table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13px}
+.story-table th,.story-table td{padding:8px 12px; border:1px solid rgba(120,160,200,0.12); text-align:left}
+.story-table th{background:rgba(255,179,0,0.08); color:var(--amber); font-weight:600}
+.story-table td{color:var(--text-dim)}
+.story-quote{
+  margin:20px 0; padding:16px 20px; border-left:3px solid var(--amber);
+  background:rgba(255,179,0,0.04); color:var(--text); font-style:italic; font-size:15px; line-height:1.8
+}
+
+/* ===== TERM TOOLTIPS ===== */
+.term{
+  color:var(--term-color); border-bottom:1px dashed rgba(255,179,0,0.4);
+  cursor:help; position:relative; padding:0 1px; transition:background .2s;
+}
+.term:hover{background:var(--term-bg)}
+.tooltip-box{
+  position:fixed; z-index:1000; max-width:320px; padding:14px 16px;
+  background:rgba(12,17,24,0.96); border:1px solid var(--cyan); border-radius:8px;
+  box-shadow:0 8px 32px rgba(0,229,255,0.15); color:var(--text); font-size:13px; line-height:1.7;
+  pointer-events:none; opacity:0; transition:opacity .2s;
+}
+.tooltip-box.show{opacity:1}
+.tooltip-box .tt-title{color:var(--cyan); font-weight:600; margin-bottom:4px}
+
+/* ===== PRACTICE PANELS ===== */
+.panel{
+  background:var(--panel); border:1px solid var(--edge); border-radius:12px;
+  padding:32px; margin-bottom:24px; position:relative;
+}
+.panel--warm{background:var(--panel-warm); border-color:var(--edge-warm)}
+.panel__title{font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px}
+.panel__desc{color:var(--text-dim); font-size:13px; margin-bottom:20px}
+
+/* ===== STATS TABLE ===== */
+.stats-table{width:100%; border-collapse:collapse; font-size:13px; margin-top:16px}
+.stats-table th,.stats-table td{padding:8px 10px; border-bottom:1px solid rgba(120,160,200,0.1); text-align:right}
+.stats-table th:first-child,.stats-table td:first-child{text-align:left}
+.stats-table th{color:var(--text-mute); font-weight:500; font-size:11px; letter-spacing:0.08em; text-transform:uppercase}
+.stats-table td{color:var(--text-dim)}
+.stats-table td:first-child{color:var(--text)}
+.stats-table .num{font-family:"JetBrains Mono","SF Mono",Consolas,monospace}
+.missing-badge{display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600}
+.missing-badge.ok{background:rgba(37,232,153,0.12); color:var(--down); border:1px solid rgba(37,232,153,0.3)}
+
+/* ===== INTERACTIVE ===== */
+.interactive-controls{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:24px}
+.btn-group{display:flex; gap:0; border:1px solid var(--edge); border-radius:8px; overflow:hidden}
+.btn-group button{
+  padding:10px 20px; background:transparent; border:none; color:var(--text-dim);
+  font-size:13px; cursor:pointer; transition:all .2s; font-family:inherit;
+}
+.btn-group button.active{background:rgba(0,229,255,0.12); color:var(--cyan)}
+.btn-group button:hover{color:var(--text)}
+.chart-container{position:relative; height:380px; margin:20px 0; background:rgba(5,8,13,0.4); border-radius:8px; padding:16px}
+.chart-container.tall{height:440px}
+.judge-area{
+  margin-top:24px; padding:24px; background:rgba(0,229,255,0.04);
+  border:1px solid var(--edge); border-radius:10px; text-align:center;
+}
+.judge-area p{color:var(--text-dim); margin-bottom:16px}
+.judge-btns{display:flex; gap:12px; justify-content:center}
+.judge-btn{
+  padding:12px 36px; border-radius:8px; font-size:15px; font-weight:600;
+  cursor:pointer; border:1px solid; transition:all .2s; font-family:inherit;
+}
+.judge-btn--buy{background:rgba(255,77,109,0.1); border-color:var(--up); color:var(--up)}
+.judge-btn--buy:hover{background:rgba(255,77,109,0.2)}
+.judge-btn--sell{background:rgba(37,232,153,0.1); border-color:var(--down); color:var(--down)}
+.judge-btn--sell:hover{background:rgba(37,232,153,0.2)}
+.judge-btn:disabled{opacity:0.4; cursor:not-allowed}
+.result-area{
+  margin-top:20px; padding:24px; border-radius:10px; display:none;
+  text-align:left; animation:fadeIn .4s ease;
+}
+.result-area.show{display:block}
+.result-area.correct{background:rgba(37,232,153,0.06); border:1px solid rgba(37,232,153,0.3)}
+.result-area.wrong{background:rgba(255,77,109,0.06); border:1px solid rgba(255,77,109,0.3)}
+.result-area h4{font-size:16px; margin-bottom:12px}
+.result-area.correct h4{color:var(--down)}
+.result-area.wrong h4{color:var(--up)}
+.result-area p{color:var(--text-dim); font-size:14px; margin-bottom:10px; line-height:1.8}
+.result-area .laowang{margin-top:14px; padding:12px 16px; background:rgba(255,179,0,0.06); border-left:3px solid var(--amber); border-radius:0 6px 6px 0; font-size:13px; color:var(--text-dim)}
+.result-area .laowang::before{content:"老王说："; color:var(--amber); font-weight:600}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)}}
+
+/* ===== CODE BLOCKS ===== */
+.code-block{
+  margin:16px 0; padding:16px 20px; background:rgba(5,8,13,0.6);
+  border:1px solid var(--edge); border-radius:8px; overflow-x:auto;
+  font-family:"JetBrains Mono","SF Mono",Consolas,monospace; font-size:12.5px; line-height:1.7;
+}
+.code-block .kw{color:#c792ea}
+.code-block .fn{color:var(--cyan)}
+.code-block .str{color:var(--down)}
+.code-block .num{color:var(--amber)}
+.code-block .com{color:var(--text-mute); font-style:italic}
+.code-block .var{color:var(--text)}
+
+/* ===== SLIDER ===== */
+.slider-row{display:flex; align-items:center; gap:16px; margin:16px 0}
+.slider-row label{font-size:13px; color:var(--text-dim); white-space:nowrap; min-width:100px}
+.slider-row input[type=range]{
+  flex:1; -webkit-appearance:none; appearance:none; height:4px;
+  background:rgba(0,229,255,0.15); border-radius:2px; outline:none;
+}
+.slider-row input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:16px; height:16px;
+  border-radius:50%; background:var(--cyan); cursor:pointer;
+  box-shadow:0 0 8px rgba(0,229,255,0.4);
+}
+.slider-row .val{font-family:"JetBrains Mono",monospace; font-size:13px; color:var(--cyan); min-width:40px; text-align:right}
+
+/* ===== PARAM COMPARISON ===== */
+.param-chart{height:420px; margin:20px 0; background:rgba(5,8,13,0.4); border-radius:8px; padding:16px}
+.param-conclusion{
+  margin-top:24px; padding:20px 24px; background:rgba(255,179,0,0.05);
+  border:1px solid rgba(255,179,0,0.15); border-radius:8px;
+  font-size:14px; color:var(--text-dim); line-height:1.8;
+}
+.param-conclusion strong{color:var(--amber)}
+
+/* ===== FOOTER ===== */
+.footer{padding:48px 0 32px; text-align:center; color:var(--text-mute); font-size:12px; line-height:1.8}
+.footer .ac{color:var(--amber)}
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal{opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease}
+.reveal.visible{opacity:1; transform:translateY(0)}
+
+/* ===== MISC ===== */
+.divider{height:1px; background:linear-gradient(90deg, transparent, var(--edge), transparent); margin:48px 0}
+.warm-divider{height:1px; background:linear-gradient(90deg, transparent, var(--edge-warm), transparent); margin:48px 0}
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav class="nav">
+  <div class="nav__inner">
+    <span class="nav__logo">老王卖瓜</span>
+    <div class="nav__links">
+      <a href="#story-top">故事</a>
+      <a href="#practice-top">实战</a>
+      <a href="#param-top">参数实验</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero__deco"></div>
+  <div class="container">
+    <span class="hero__tag">HW2 · 技术指标分析</span>
+    <h1 class="hero__title">老王卖瓜<br>一个散户的自我修养</h1>
+    <p class="hero__sub">用<span class="ac">西瓜</span>理解股票技术指标 — RSI · MACD · 布林带 · OBV</p>
+    <p class="hero__desc">
+      老王在菜市场摆摊卖西瓜，用最朴素的直觉发明了六个工具，却意外道出了技术分析的精髓。
+      这是一个关于趋势、力量、边界与成交量的故事，也是一份完整的量化作业。
+    </p>
+    <div class="hero__meta">
+      <div><span class="k">课程</span><span class="v">量化投资</span></div>
+      <div><span class="k">数据</span><span class="v">平安银行(000001.SZ) · 三一重工(600031.SH)</span></div>
+      <div><span class="k">工具</span><span class="v">Python · Chart.js</span></div>
+    </div>
+    <div class="hero__indicators">
+      <span>RSI 相对强弱</span>
+      <span>MACD 异同移动平均</span>
+      <span>Bollinger Bands 布林带</span>
+      <span>OBV 能量潮</span>
+      <span>参数敏感性实验</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== STORY PART 1 ===== -->
+<div id="story-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label warm">PART I · 讲解板块</div>
+      <h2 class="sec-title">老王的五大神器</h2>
+      <p class="sec-desc">老王用卖西瓜的直觉，发明了五个分析工具。
+      <span class="term" data-tt="噪音|单日价格的随机波动，不代表真实趋势。就像西瓜今天比昨天贵了两毛，可能只是因为今天天气好。">专业术语</span>会用金色标注，鼠标移上去可以看到解释。</p>
+    </div>
+
+    <!-- Chapter 1 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第一章</div>
+      <h3 class="story-card__title">西瓜价格的困惑</h3>
+      <div class="story-card__body">
+        <p>老王在菜市场卖西瓜。他每天最头疼的事就是定价。</p>
+        <p>周一5.0元一斤，周二4.8元（下雨了），周三5.2元，周四6.0元（突然暴热），周五5.5元。</p>
+        <p>有个老顾客问他："老王，最近西瓜到底是涨了还是跌了？"</p>
+        <p>老王张了张嘴，愣是答不上来。说涨吧，今天比昨天便宜；说跌吧，前天还只有5.2元。<strong>价格上蹿下跳，就像股票的心电图，看得人心慌。</strong></p>
+        <p>老王意识到：<strong>单日的价格全是<span class="term" data-tt="噪音|单日价格的随机波动，不代表真实趋势。就像西瓜今天比昨天贵了两毛，可能只是因为今天天气好。">噪音</span>，真正有用的是<span class="term" data-tt="趋势|价格在一段时间内的整体方向（上涨/下跌/横盘）。老王发现，不看单天价格，看最近几天的平均价，才能看清大方向。">趋势</span>。</strong></p>
+      </div>
+    </div>
+
+    <!-- Chapter 2 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第二章</div>
+      <h3 class="story-card__title">老王的第一个发明 — 移动平均线（MA）</h3>
+      <div class="story-card__body">
+        <p>老王想了个笨办法：<strong>我不看单天价格，我看最近5天的平均价。</strong></p>
+        <p>第一周平均价 = (5.0 + 4.8 + 5.2 + 6.0 + 5.5) ÷ 5 = <span class="highlight">5.3元</span></p>
+        <p>第二周平均价 = 算出来是 <span class="highlight">5.8元</span></p>
+        <p>老王把这两个数字连成一条线，发现<strong>线在往上走</strong>！他恍然大悟：虽然每天价格乱跳，但<strong>整体在慢慢变贵</strong>。</p>
+        <p><span class="term" data-tt="MA5|5日移动平均线，反映最近5个交易日的平均收盘价。反应快，看短期趋势。">5日均线（MA5）</span>：反应快，看短期。<br>
+        <span class="term" data-tt="MA30|30日移动平均线，反映最近30个交易日的平均收盘价。反应较慢，看中期趋势。">30日均线（MA30）</span>：反应慢，看中期。<br>
+        <span class="term" data-tt="年线|250日移动平均线，反映近一年的平均价格。年线之上通常被视为牛市，之下为熊市。">250日均线（年线）</span>：看长期牛熊。</p>
+        <p><strong>老王的第一个工具诞生了：移动平均线，把杂乱的价格磨平，看清大方向。</strong></p>
+      </div>
+      <div class="story-card__note">
+        <div class="note-label">📐 老王的记账本</div>
+        <div class="note-body">
+          <strong>MA(n) = (C₁ + C₂ + ... + Cₙ) ÷ n</strong>
+          <div class="formula">MA5 = (C1 + C2 + C3 + C4 + C5) / 5</div>
+          其中 C 为每日收盘价，n 为计算周期。
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 3 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第三章</div>
+      <h3 class="story-card__title">老王的第二个发明 — MACD（两条均线的距离）</h3>
+      <div class="story-card__body">
+        <p>老王用了均线后，发现一个问题：<strong>均线太迟钝了。</strong> 等它拐头向上，西瓜价格已经涨了两块钱。</p>
+        <p>他琢磨：<strong>"我能不能提前知道均线要拐头？"</strong></p>
+        <p>于是他盯着 <span class="term" data-tt="快线|短期指数移动平均线（EMA），对价格变化反应灵敏。MACD中默认用12日EMA。">12日EMA（快线）</span> 和 <span class="term" data-tt="慢线|长期指数移动平均线（EMA），对价格变化反应迟缓。MACD中默认用26日EMA。">26日EMA（慢线）</span>，突然灵光一闪：</p>
+        <div class="story-quote">我算算这两条线差了多少！</div>
+        <p>涨价初期：12日EMA刚超过26日EMA，差值为 <span class="highlight">+0.2元</span>。<br>
+        涨价高潮：12日EMA远远甩开26日EMA，差值为 <span class="highlight">+2.0元</span>。<br>
+        涨不动了：12日EMA开始走平，26日EMA慢慢跟上，差值缩小到 <span class="highlight">+0.5元</span>。</p>
+        <p>老王把这个差值画成一条线，叫 <strong><span class="term" data-tt="DIF|差离值，MACD的核心线。DIF = 12日EMA - 26日EMA，反映短期趋势与长期趋势的偏离程度。">"白线"（DIF）</span></strong>，代表<strong>上涨的加速度</strong>。</p>
+        <p>但白线太灵敏了，老王又对它做了个 <strong>9日平均</strong>，得到 <strong><span class="term" data-tt="DEA|信号线，DIF的9日指数移动平均。比DIF更平滑，用于生成交易信号。">"黄线"（DEA）</span></strong>。</p>
+        <p><span class="term" data-tt="金叉|DIF（白线）从下方向上穿过DEA（黄线），是买入信号。意味着短期动能开始强于近期平均动能。">白线上穿黄线</span> → <strong class="red">黄金交叉</strong>，进货信号。<br>
+        <span class="term" data-tt="死叉|DIF（白线）从上方向下穿过DEA（黄线），是卖出信号。意味着短期动能开始弱于近期平均动能。">白线下穿黄线</span> → <strong class="green">死亡交叉</strong>，清仓信号。</p>
+        <p>红柱/绿柱 = (DIF - DEA) × 2，柱状图反映多空力量对比的强弱。</p>
+      </div>
+      <div class="story-card__note">
+        <div class="note-label">📐 老王的记账本</div>
+        <div class="note-body">
+          <strong>MACD 计算公式：</strong>
+          <div class="formula">DIF = EMA(12) - EMA(26)<br>DEA = EMA(DIF, 9)<br>MACD柱 = (DIF - DEA) × 2</div>
+          EMA = 指数移动平均，越近的数据权重越大。
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 4 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第四章</div>
+      <h3 class="story-card__title">老王的第三个发明 — RSI（多空打架谁赢了）</h3>
+      <div class="story-card__body">
+        <p>老王又发现：光看加速度还不够，他想知道<strong>现在是买方力气大，还是卖方力气大</strong>。</p>
+        <p>于是他盯着每天的涨跌：如果今天涨了，上涨幅度记为正；如果今天跌了，下跌幅度记为负。</p>
+        <p>然后他算：<strong>最近14天里，上涨的总幅度占（上涨+下跌）总幅度的比例。</strong></p>
+        <div class="story-quote">RSI = 100 × 上涨幅度 ÷ (上涨幅度 + 下跌幅度)</div>
+        <p><span class="term" data-tt="超买|RSI > 70，意味着近期上涨力度远超下跌力度，买方力量过强，价格可能即将回调。但注意：超买不等于马上跌。">RSI > 70</span> → 买方力气太大，西瓜<strong class="red">超买</strong>了，可能要回调。<br>
+        <span class="term" data-tt="超卖|RSI < 30，意味着近期下跌力度远超上涨力度，卖方力量过强，价格可能即将反弹。但注意：超卖不等于马上涨。">RSI < 30</span> → 卖方力气太大，西瓜<strong class="green">超卖</strong>了，可能要反弹。<br>
+        RSI在50附近 → <span class="term" data-tt="多空力量|买方（多头）与卖方（空头）的力量对比。RSI=50意味着双方势均力敌。">多空平衡</span>。</p>
+      </div>
+      <div class="story-card__note">
+        <div class="note-label">📐 老王的记账本</div>
+        <div class="note-body">
+          <strong>RSI 计算公式：</strong>
+          <div class="formula">RS = 平均上涨幅度 / 平均下跌幅度<br>RSI = 100 - 100 / (1 + RS)</div>
+          平均涨跌幅度使用 Wilder 平滑法计算，周期默认14日。
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 5 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第五章</div>
+      <h3 class="story-card__title">老王的第四个发明 — 布林带（给西瓜画条走廊）</h3>
+      <div class="story-card__body">
+        <p>老王又琢磨：价格总是上蹿下跳，但<strong>大多数时候是不是在一个"合理范围"里活动？</strong></p>
+        <p>他修了一条"走廊"，把西瓜价格框在里面：</p>
+        <p><span class="term" data-tt="中轨|布林带的中线，即20日简单移动平均线（SMA）。代表价格的近期均值。">中轨</span>：20日均线（平均价）。<br>
+        <span class="term" data-tt="上轨|布林带上轨 = 中轨(SMA20) + 2×标准差。当价格触及上轨时，说明价格已远超近期平均水平，属于统计上的极端高位——可能面临回调压力；但如果价格持续贴着上轨运行，则说明上升趋势极强，此时上轨不是天花板而是跟随趋势的风向标。">上轨</span>：中轨 + 2倍的<span class="term" data-tt="标准差|衡量价格波动幅度的统计量。标准差越大，说明价格波动越剧烈，布林带走廊越宽。">"波动率"</span>（天花板）。<br>
+        <span class="term" data-tt="下轨|布林带下轨 = 中轨(SMA20) - 2×标准差。当价格触及下轨时，说明价格已远低于近期平均水平，统计上处于极端低位——可能迎来超跌反弹；但如果价格持续贴着下轨运行，说明下跌趋势极强，此时下轨不是地板而是加速下跌的信号。">下轨</span>：中轨 - 2倍的"波动率"（地板）。</p>
+        <div class="story-quote">波动率越大，走廊越宽；波动率越小，走廊越窄。</div>
+        <p>老王发现了两条神奇规律：</p>
+        <p>1. <strong>走廊突然收窄</strong> → 市场死一般寂静，多空都在憋大招 → 即将<span class="term" data-tt="变盘|价格趋势即将发生方向性反转。布林带收窄后往往伴随大幅波动。">变盘</span>。<br>
+        2. <strong>价格贴着上轨往上走</strong> → 多头极强，趋势强劲。<br>
+        3. <strong>价格贴着下轨往下走</strong> → 空头极强，趋势疲软。</p>
+      </div>
+      <div class="story-card__note">
+        <div class="note-label">📐 老王的记账本</div>
+        <div class="note-body">
+          <strong>布林带计算公式：</strong>
+          <div class="formula">中轨 = SMA(close, 20)<br>上轨 = 中轨 + 2 × StdDev(close, 20)<br>下轨 = 中轨 - 2 × StdDev(close, 20)<br>带宽 = (上轨 - 下轨) / 中轨</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 6 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第六章 · 扩展了解</div>
+      <h3 class="story-card__title">老王的第五个发明 — ATR（颠簸测量仪）</h3>
+      <div class="story-card__body">
+        <p>有了这四个工具，老王还是吃过一次大亏。</p>
+        <p>有一天他看准了行情，满仓买入。结果那天市场<strong>剧烈震荡</strong>，价格大起大落，老王在最低点被"震"了出去（止损出局），卖完股价立刻暴涨。</p>
+        <p>老王拍断大腿："不是我看错了方向，是<strong>路太颠了，我被颠下车了！</strong>"</p>
+        <p>于是他发明了 <span class="term" data-tt="ATR|平均真实波幅（Average True Range）。先算「真实波幅」TR——取当日最高-最低价、当日最高-前日收盘、前日收盘-当日最低三者中最大值，这一步能捕捉跳空缺口带来的额外波动；再对TR做14日移动平均得到ATR。ATR不判断方向，只衡量波动有多大。ATR=2元意味着最近14天平均每天波动2块钱——这个值让你知道正常震荡的范围是多少，从而设置合适的止损（通常=2×ATR）和控制仓位（ATR大→轻仓，ATR小→重仓），避免被正常颠簸甩下车。">ATR（平均真实波幅）</span>——就是<strong>测量市场"颠簸度"的尺子</strong>。</p>
+        <p>ATR = 2元 → 每天正常波动2块钱。<br>
+        <span class="term" data-tt="止损|当价格跌到预设水平时卖出，以限制亏损。ATR止损法：止损价 = 买入价 - 2×ATR，放足够宽的止损以扛过正常波动。">止损线</span> = 入场价 ± 2 × ATR → 放4块钱的止损，扛过正常颠簸。</p>
+      </div>
+      <div class="story-card__note">
+        <div class="note-label">📐 老王的记账本</div>
+        <div class="note-body">
+          <strong>ATR 计算公式：</strong>
+          <div class="formula">TR = max(H-L, |H-Cprev|, |L-Cprev|)<br>ATR = SMA(TR, 14)</div>
+          TR = 真实波幅，H=最高价，L=最低价，Cprev=前日收盘价。
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 7 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第七章 · 批判性思考</div>
+      <h3 class="story-card__title">指标会"失灵" — 老王的血泪教训</h3>
+      <div class="story-card__body">
+        <p>老王刚开始得意忘形，以为集齐了五个工具就能天下无敌。结果被市场狠狠教训了三次。</p>
+        <p><strong>教训一：MACD<span class="term" data-tt="钝化|指标在极端行情中失效，信号不再可靠。比如大牛市中MACD死叉后股价继续暴涨，死叉信号完全失效。">钝化</span>（沸水里的假死叉）</strong></p>
+        <p>大牛市中，MACD红柱拉到极限后突然缩短，白线掉头向下，形成<strong>死叉</strong>。老王吓得赶紧全卖了。结果卖完第二天，股价<strong class="red">继续暴涨</strong>。</p>
+        <p class="highlight">在极端上涨行情里，MACD会"钝化"，卖出信号基本失效。这时候要忽略指标，持股不动。</p>
+        <p><strong>教训二：RSI钝化（疯牛里的超买）</strong></p>
+        <p>RSI涨到了82（远超70的超买线），老王卖出。结果RSI一路飙到90多，股价继续疯涨。</p>
+        <p class="highlight">在极端行情里，RSI会一直"钝化"，超买后还能再超买。这时候不能看RSI，要看趋势。</p>
+        <p><strong>教训三：布林带陷阱（<span class="term" data-tt="单边行情|价格持续朝一个方向运动，很少回调。在单边大涨中，布林带上轨不是天花板，而是风向标。">单边行情</span>里撑开走廊）</strong></p>
+        <p>股价沿着布林带上轨"贴地飞行"。老王以为碰到天花板该卖了，结果股价继续突破上轨，一飞冲天。</p>
+        <p class="highlight">在单边大涨里，布林带的上轨不是"天花板"，而是"风向标"——价格沿着上轨走，说明趋势极强，要持有而不是卖出。</p>
+      </div>
+    </div>
+
+    <!-- Chapter 8 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">第八章 · 综合应用</div>
+      <h3 class="story-card__title">老王的终极心法 — 组合拳</h3>
+      <div class="story-card__body">
+        <p>经过无数次亏钱，老王终于总结出<strong>铁血五步法</strong>：</p>
+        <table class="story-table">
+          <tr><th>步骤</th><th>工具</th><th>老王的操作</th></tr>
+          <tr><td>第一步：看天气</td><td>大盘指数 + 60日均线</td><td>大盘在60日线上面 → 晴天，可以玩</td></tr>
+          <tr><td>第二步：定方向</td><td>MA + MACD</td><td><span class="term" data-tt="多头排列|短期均线 > 中期均线 > 长期均线，是强势上涨信号。">均线多头排列</span> + MACD <span class="term" data-tt="零轴|MACD的中轴线（值=0）。DIF/DEA在零轴上方为多头市场，下方为空头市场。">零轴</span>上方 → 只做多</td></tr>
+          <tr><td>第三步：找位置</td><td>布林带 + RSI</td><td>价格在上轨且RSI>70 → 警惕超买</td></tr>
+          <tr><td>第四步：设止损</td><td>ATR</td><td>止损价 = 买入价 - 2×ATR</td></tr>
+          <tr><td>第五步：控仓位</td><td>ATR</td><td>波动大时轻仓，波动小时重仓</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="warm-divider"></div>
+
+    <!-- ===== STORY PART 2: OBV ===== -->
+    <div class="sec-head reveal" style="margin-top:48px">
+      <div class="sec-label warm">PART I · 下篇</div>
+      <h2 class="sec-title">老王的第六个发明 — OBV（能量潮）</h2>
+      <p class="sec-desc">价格可以骗人，但成交量骗不了人。</p>
+    </div>
+
+    <!-- OBV Chapter 1 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">OBV 第一章</div>
+      <h3 class="story-card__title">老王被骗了</h3>
+      <div class="story-card__body">
+        <p>自从老王集齐了均线、MACD、RSI、布林带、ATR五大神器，他在菜市场里混得风生水起，大家都叫他"西瓜王"。</p>
+        <p>但有一天，他翻车了。</p>
+        <p>那天，老王盯上了一只叫"暴风科技"的股票。<strong class="red">MACD金叉、RSI刚过50（不超买）、布林带向上开口</strong>——三个指标同时发出买入信号，完美！</p>
+        <p>老王满仓杀入。</p>
+        <p>结果买进去之后，股价不但没涨，反而掉头向下，直接跌破止损线。老王割肉出局，亏了两个月卖西瓜的利润。</p>
+        <p>老王想不通："所有指标都告诉我该买，为什么会亏？"</p>
+        <p>他坐在西瓜堆里，突然发现问题出在哪儿了：<strong>他忘了看成交量！</strong></p>
+        <p>他去翻那几天的交易记录，发现股价上涨的那几天，<strong>成交量一天比一天低</strong>——涨是涨了，但根本没人跟，是主力自己拉高出货，俗称<strong><span class="term" data-tt="无量上涨|价格上涨但成交量萎缩，说明上涨缺乏买盘支撑，通常不可持续。主力可能通过少量资金拉高价格，吸引散户追入后出货。">无量上涨</span></strong>。</p>
+        <p>老王一拍大腿："我光听喇叭响（指标），没看有多少人真的在掏钱进场（成交量）！"</p>
+        <div class="story-quote">老王的觉醒：价格可以骗人，但成交量骗不了人。</div>
+      </div>
+    </div>
+
+    <!-- OBV Chapter 2 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">OBV 第二章</div>
+      <h3 class="story-card__title">OBV 的发明 — 能量潮记录本</h3>
+      <div class="story-card__body">
+        <p>老王决定：<strong>必须把成交量纳入分析系统。</strong></p>
+        <p>但成交量天天在变，今天100万手，明天200万手，后天80万手，怎么看？他又用了那个土办法：<strong>算累计。</strong></p>
+        <p>他拿出一本新账本，取名 <strong>"<span class="term" data-tt="能量潮|OBV（On Balance Volume）的别称，因为OBV线像潮水一样起起落落，反映资金的流入与流出。">能量潮记录本</span>"</strong>，定下规矩：</p>
+        <div class="story-quote">
+          今天收盘价 > 昨天收盘价 → OBV = 前一日OBV + 今日成交量（<span class="term" data-tt="资金流入|上涨日的成交量被计入OBV的增加，代表买方资金流入。">资金流入</span>）<br>
+          今天收盘价 < 昨天收盘价 → OBV = 前一日OBV - 今日成交量（<span class="term" data-tt="资金流出|下跌日的成交量被计入OBV的减少，代表卖方资金流出。">资金流出</span>）<br>
+          今天收盘价 = 昨天收盘价 → OBV不变（观望）
+        </div>
+        <p>第一天，OBV从0开始。</p>
+        <p>第一天：涨，成交量100万 → OBV = 0 + 100 = <span class="highlight">100万</span><br>
+        第二天：跌，成交量80万 → OBV = 100 - 80 = <span class="highlight">20万</span><br>
+        第三天：涨，成交量200万 → OBV = 20 + 200 = <span class="highlight">220万</span><br>
+        第四天：跌，成交量50万 → OBV = 220 - 50 = <span class="highlight">170万</span></p>
+        <p>老王把每天的OBV值连成一条线，发现这条线就像<strong>潮水一样起起落落</strong>。价格涨、OBV也涨 → "涨潮"；价格跌、OBV也跌 → "退潮"。</p>
+      </div>
+      <div class="story-card__note">
+        <div class="note-label">📐 老王的记账本</div>
+        <div class="note-body">
+          <strong>OBV 计算公式：</strong>
+          <div class="formula">if close > close_prev: OBV = OBV_prev + volume<br>if close < close_prev: OBV = OBV_prev - volume<br>if close == close_prev: OBV = OBV_prev</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OBV Chapter 3 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">OBV 第三章</div>
+      <h3 class="story-card__title">OBV 的价值在哪里？</h3>
+      <div class="story-card__body">
+        <p>老王把OBV跟之前的五个工具做了个对比，想明白了一件事：</p>
+        <table class="story-table">
+          <tr><th>工具</th><th>看什么</th><th>数据来源</th></tr>
+          <tr><td>MA / MACD / RSI / 布林带</td><td>价格</td><td>收盘价、最高价、最低价</td></tr>
+          <tr><td>ATR</td><td>波动幅度</td><td>价格</td></tr>
+          <tr><td><strong>OBV</strong></td><td><strong>资金流向</strong></td><td><strong>成交量</strong></td></tr>
+        </table>
+        <p>所有指标都是用价格算的，只有<strong>OBV是用成交量算的</strong>。</p>
+        <div class="story-quote">价格是投票的结果，成交量是投票的人数。</div>
+        <p>老王恍然大悟：之前他所有工具都在分析"投票结果"，但从来没看过"投票人数"是多少。如果投票结果涨了，但投票人数只有三个人，那这个涨是虚的。但如果投票结果涨了，投票人数有一万人，那才是真正的民心所向。</p>
+        <p><strong>OBV就是专门看"投票人数"的。</strong></p>
+      </div>
+    </div>
+
+    <!-- OBV Chapter 4 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">OBV 第四章 · 核心亮点</div>
+      <h3 class="story-card__title">量价背离 — 老王的核心发现</h3>
+      <div class="story-card__body">
+        <p>老王最引以为傲的发现，就是<strong>"背离"</strong>——这是OBV最值钱的用法。</p>
+        <p><strong class="red">场景一：顶背离（逃命信号）</strong></p>
+        <p>暴风科技从10元涨到20元，但OBV不但没涨，反而在下降。老王在20元那天，看到价格还在创新高，OBV却连续三天下降。他果断清仓。三天后，暴风科技从20元直接跌到15元。老王躲过一劫。</p>
+        <div class="story-quote">价格创新高，OBV不创新高 → 这是主力在"<span class="term" data-tt="边拉边出货|主力在拉高价格的同时悄悄卖出。表面看价格在涨，实际上大资金在撤退，OBV会先于价格下跌。">边拉边出货</span>"，赶紧跑！</div>
+        <p><strong class="green">场景二：底背离（抄底信号）</strong></p>
+        <p>三一重工从30元跌到20元，所有人都在恐慌割肉。但老王打开OBV一看：价格在跌，OBV却在悄悄创新高。他在20元果断买入。一个月后，三一重工反弹到25元。</p>
+        <div class="story-quote">价格创新低，OBV不创新低 → 这是主力在"<span class="term" data-tt="悄悄吸筹|主力在价格低迷时悄悄买入。表面看价格在跌，实际上大资金在进场，OBV会先于价格上涨。">悄悄吸筹</span>"，跟着买！</div>
+      </div>
+    </div>
+
+    <!-- OBV Chapter 5 -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">OBV 第五章</div>
+      <h3 class="story-card__title">五步法升级为六步法</h3>
+      <div class="story-card__body">
+        <p>从此，老王的"铁血五步法"升级成了"终极六步法"：</p>
+        <table class="story-table">
+          <tr><th>步骤</th><th>工具</th><th>老王的操作</th></tr>
+          <tr><td>第一步：看天气</td><td>大盘指数 + 60日均线</td><td>晴天还是雨天？</td></tr>
+          <tr><td>第二步：定方向</td><td>MA + MACD</td><td>做多还是做空？</td></tr>
+          <tr><td>第三步：找位置</td><td>布林带 + RSI</td><td>超买还是超卖？</td></tr>
+          <tr><td><strong>第四步：查资金</strong></td><td><strong>OBV</strong></td><td><strong>量价配合还是背离？</strong></td></tr>
+          <tr><td>第五步：设止损</td><td>ATR</td><td>放多宽的止损？</td></tr>
+          <tr><td>第六步：控仓位</td><td>ATR</td><td>押重注还是轻仓？</td></tr>
+        </table>
+        <div class="story-quote">OBV和价格方向一致 → 放心操作<br>OBV和价格方向背离 → 谨慎操作，甚至可以反向操作</div>
+      </div>
+    </div>
+
+    <!-- OBV Chapter 6 + Ending -->
+    <div class="story-card reveal">
+      <div class="story-card__chap">OBV 第六章 · 终极领悟</div>
+      <h3 class="story-card__title">西瓜拍打器</h3>
+      <div class="story-card__body">
+        <p>有一天，老王站在他的西瓜摊前，看着满地的西瓜（他觉得每颗西瓜都像一只股票），说了一番话：</p>
+        <div class="story-quote">
+          以前我只盯着瓜的皮（价格），以为皮变红了瓜就甜了。后来我才发现，得敲开看看有没有人买（成交量）。没人买的红皮瓜，切开全是生的。
+        </div>
+        <div class="story-quote">
+          OBV就是我的"西瓜拍打器"——价格涨了，OBV也在涨，说明这瓜真甜，放心吃。价格涨了，OBV在跌，说明这瓜被注水了，赶紧放下。
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card reveal" style="text-align:center">
+      <div class="story-card__chap">结局</div>
+      <h3 class="story-card__title">老王的名言墙</h3>
+      <div class="story-card__body">
+        <div class="story-quote" style="font-size:17px; text-align:center">指标要看量，量价要配合。</div>
+        <div class="story-quote" style="font-size:17px; text-align:center">背离要警惕，方向确认再动手。</div>
+        <div class="story-quote" style="font-size:17px; text-align:center">价格是兵，成交量是粮，兵马未动，粮草先行。</div>
+        <div class="story-quote" style="font-size:17px; text-align:center; border-color:var(--up); background:rgba(255,77,109,0.04)">没有成交量的上涨，都是耍流氓！</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRACTICE SECTION ===== -->
+<div id="practice-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">PART II · 实战演练</div>
+      <h2 class="sec-title">老王的实战图表</h2>
+      <p class="sec-desc">把故事里的直觉变成代码和图表。选择股票和指标，自己判断买卖，再看完整分析。</p>
+    </div>
+
+    <!-- Section A: Data Diagnostics -->
+    <div class="panel reveal" id="diag-panel">
+      <div class="panel__title">数据诊断</div>
+      <div class="panel__desc">老王先把账本翻了一遍，看看有没有漏记的</div>
+
+      <div id="diag-content">
+        <p style="color:var(--text-mute); text-align:center; padding:40px 0">加载中...</p>
+      </div>
+    </div>
+
+    <!-- Section B: Interactive Indicators -->
+    <div class="panel reveal" id="interactive-panel">
+      <div class="panel__title">交互式指标分析</div>
+      <div class="panel__desc">选择股票和指标，用滑块选一个时间点，判断该买还是卖，然后看完整分析</div>
+
+      <div class="interactive-controls">
+        <div class="btn-group" id="stock-selector">
+          <button class="active" data-stock="pingan">平安银行</button>
+          <button data-stock="sany">三一重工</button>
+        </div>
+        <div class="btn-group" id="indicator-selector">
+          <button class="active" data-indicator="rsi">RSI</button>
+          <button data-indicator="macd">MACD</button>
+          <button data-indicator="boll">布林带</button>
+          <button data-indicator="obv">OBV</button>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <label>选择日期</label>
+        <input type="range" id="date-slider" min="0" max="100" value="50" step="1" />
+        <span class="val" id="date-display">--</span>
+      </div>
+
+      <div class="chart-container tall" id="main-chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+
+      <div class="judge-area" id="judge-area">
+        <p>看着上面的图表，<strong>你觉得这个时间点该买还是卖？</strong></p>
+        <div class="judge-btns">
+          <button class="judge-btn judge-btn--buy" id="btn-buy">买入</button>
+          <button class="judge-btn judge-btn--sell" id="btn-sell">卖出</button>
+        </div>
+      </div>
+
+      <div class="result-area" id="result-area"></div>
+
+      <div class="code-block" id="code-block"></div>
+    </div>
+
+    <!-- Signal markers info -->
+    <div class="panel reveal">
+      <div class="panel__title">关键信号一览</div>
+      <div class="panel__desc">老王在图中标注的关键信号点</div>
+      <div id="signals-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PARAM SENSITIVITY ===== -->
+<div id="param-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">PART III · 创新思考</div>
+      <h2 class="sec-title">参数敏感性实验</h2>
+      <p class="sec-desc">老王发现，尺子的刻度不同，量的结果也不一样——那到底用哪个刻度？拖动滑块，自己感受参数变化对指标的影响。</p>
+    </div>
+
+    <!-- RSI Parameter -->
+    <div class="panel reveal">
+      <div class="panel__title">RSI 参数对比</div>
+      <div class="panel__desc">7天（灵敏）vs 14天（经典）vs 21天（迟缓）—— 拖动滑块实时调整</div>
+
+      <div class="interactive-controls">
+        <div class="btn-group" id="param-stock-selector">
+          <button class="active" data-stock="pingan">平安银行</button>
+          <button data-stock="sany">三一重工</button>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <label>RSI 周期</label>
+        <input type="range" id="rsi-period-slider" min="3" max="30" value="14" step="1" />
+        <span class="val" id="rsi-period-val">14</span>
+      </div>
+
+      <div class="param-chart">
+        <canvas id="rsiParamChart"></canvas>
+      </div>
+
+      <div class="param-conclusion">
+        <p><strong>观察发现：</strong></p>
+        <p>• 周期越短（如7天），RSI波动越剧烈，信号越多但假信号也多——容易"一惊一乍"</p>
+        <p>• 周期越长（如21天），RSI越平滑，信号少但更可靠——反应慢，可能错过机会</p>
+        <p>• <strong>没有"最好"的参数，只有最适合当前西瓜的参数。</strong> 波动大的股票适合长周期，波动小的适合短周期。</p>
+      </div>
+    </div>
+
+    <!-- Bollinger Parameter -->
+    <div class="panel reveal">
+      <div class="panel__title">布林带参数对比</div>
+      <div class="panel__desc">1.5σ（窄走廊）vs 2σ（经典）vs 2.5σ（宽走廊）—— 拖动滑块实时调整</div>
+
+      <div class="slider-row">
+        <label>标准差倍数</label>
+        <input type="range" id="boll-std-slider" min="1" max="3" value="2" step="0.1" />
+        <span class="val" id="boll-std-val">2.0</span>
+      </div>
+
+      <div class="param-chart">
+        <canvas id="bollParamChart"></canvas>
+      </div>
+
+      <div class="param-conclusion">
+        <p><strong>观察发现：</strong></p>
+        <p>• σ越小（如1.5），走廊越窄，突破信号频繁但可靠性低——"天花板"太矮</p>
+        <p>• σ越大（如2.5），走廊越宽，突破信号少但可靠性高——"天花板"太高，可能等不到</p>
+        <p>• <strong>参数选择本质上是在"灵敏度"和"可靠性"之间做权衡。</strong> 这就是为什么老王说"没有最好的参数"。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <p><span class="ac">老王卖瓜</span> · 量化投资 HW2 · 技术指标分析</p>
+    <p>数据来源：Tushare Pro · 平安银行(000001.SZ) · 三一重工(600031.SH)</p>
+    <p style="margin-top:8px; opacity:0.5">"指标是体温计，不是预言家。" —— 老王</p>
+  </div>
+</footer>
+
+<!-- ===== TOOLTIP ELEMENT ===== -->
+<div class="tooltip-box" id="tooltip"></div>
+
+<script>
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+const DATA = {};
+let mainChart = null;
+let rsiParamChart = null;
+let bollParamChart = null;
+let currentStock = 'pingan';
+let currentIndicator = 'rsi';
+let currentDateIdx = 0;
+
+// ============================================================
+// TOOLTIP SYSTEM
+// ============================================================
+const tooltipEl = document.getElementById('tooltip');
+
+document.addEventListener('mouseover', (e) => {
+  const term = e.target.closest('.term');
+  if (!term) return;
+  const raw = term.dataset.tt;
+  if (!raw) return;
+  const [title, body] = raw.split('|');
+  tooltipEl.innerHTML = `<div class="tt-title">${title}</div><div>${body || ''}</div>`;
+  tooltipEl.classList.add('show');
+  positionTooltip(e);
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (tooltipEl.classList.contains('show')) positionTooltip(e);
+});
+
+document.addEventListener('mouseout', (e) => {
+  if (e.target.closest('.term')) tooltipEl.classList.remove('show');
+});
+
+function positionTooltip(e) {
+  const x = e.clientX + 16;
+  const y = e.clientY + 16;
+  const rect = tooltipEl.getBoundingClientRect();
+  const maxX = window.innerWidth - rect.width - 10;
+  const maxY = window.innerHeight - rect.height - 10;
+  tooltipEl.style.left = Math.min(x, maxX) + 'px';
+  tooltipEl.style.top = Math.min(y, maxY) + 'px';
+}
+
+// ============================================================
+// REVEAL ANIMATION
+// ============================================================
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ============================================================
+// DATA LOADING
+// ============================================================
+async function loadData() {
+  const files = [
+    'overview', 'pingan_stats', 'sany_stats',
+    'pingan_indicators', 'sany_indicators',
+    'pingan_param_sensitivity', 'sany_param_sensitivity'
+  ];
+  for (const f of files) {
+    try {
+      const resp = await fetch(`data/${f}.json`);
+      DATA[f] = await resp.json();
+    } catch (err) {
+      console.error(`Failed to load ${f}:`, err);
+    }
+  }
+  console.log('Data loaded:', Object.keys(DATA));
+}
+
+// ============================================================
+// CHART DEFAULTS
+// ============================================================
+Chart.defaults.color = '#8a9aae';
+Chart.defaults.borderColor = 'rgba(120,160,200,0.08)';
+Chart.defaults.font.family = "'Inter','Source Han Sans SC','Microsoft YaHei',sans-serif";
+Chart.defaults.font.size = 11;
+
+const COLORS = {
+  cyan: '#00e5ff', amber: '#ffb300', up: '#ff4d6d', down: '#25e899',
+  purple: '#a07cff', text: '#e8eef5', dim: '#8a9aae', mute: '#566578'
+};
+
+function makeGradient(ctx, color, alpha=0.15) {
+  const g = ctx.createLinearGradient(0, 0, 0, 380);
+  g.addColorStop(0, color + '40');
+  g.addColorStop(1, color + '00');
+  return g;
+}
+
+// ============================================================
+// DATA DIAGNOSTICS
+// ============================================================
+function renderDiagnostics() {
+  const html = [''];
+  for (const key of ['pingan_stats', 'sany_stats']) {
+    const s = DATA[key];
+    if (!s) continue;
+    const stockName = s.name;
+    html.push(`
+      <div style="margin-bottom:32px">
+        <h4 style="color:var(--cyan); font-size:16px; margin-bottom:6px">${stockName} (${s.ts_code})</h4>
+        <p style="color:var(--text-mute); font-size:12px; margin-bottom:12px">
+          数据范围：${s.date_range.start} ~ ${s.date_range.end} · 共 ${s.total_records} 条记录
+        </p>
+        <div style="margin-bottom:12px">
+          <span class="missing-badge ${s.missing_total === 0 ? 'ok' : ''}">
+            ${s.missing_total === 0 ? '✓ 缺失值：0' : `⚠ 缺失值：${s.missing_total}`}
+          </span>
+        </div>
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>指标</th><th>计数</th><th>均值</th><th>标准差</th><th>最小值</th><th>25%</th><th>中位数</th><th>75%</th><th>最大值</th>
+            </tr>
+          </thead>
+          <tbody>
+    `);
+    for (const [col, vals] of Object.entries(s.statistics)) {
+      html.push(`
+            <tr>
+              <td>${vals.name_cn}</td>
+              <td class="num">${vals.count}</td>
+              <td class="num">${vals.mean}</td>
+              <td class="num">${vals.std}</td>
+              <td class="num">${vals.min}</td>
+              <td class="num">${vals['25%']}</td>
+              <td class="num">${vals['50%']}</td>
+              <td class="num">${vals['75%']}</td>
+              <td class="num">${vals.max}</td>
+            </tr>
+      `);
+    }
+    html.push(`
+          </tbody>
+        </table>
+      </div>
+    `);
+  }
+  document.getElementById('diag-content').innerHTML = html.join('\n');
+}
+
+// ============================================================
+// INTERACTIVE INDICATOR CHARTS
+// ============================================================
+function getStockData() {
+  return DATA[`${currentStock}_indicators`];
+}
+
+function renderMainChart() {
+  const sd = getStockData();
+  if (!sd) return;
+  const cd = sd.chart_data;
+  const dates = cd.dates;
+  const ctx = document.getElementById('mainChart').getContext('2d');
+
+  if (mainChart) mainChart.destroy();
+
+  let datasets = [];
+  let chartType = 'line';
+  let extraPlugins = [];
+
+  if (currentIndicator === 'rsi') {
+    datasets = [{
+      label: 'RSI(14)',
+      data: cd.RSI_14,
+      borderColor: COLORS.cyan,
+      backgroundColor: makeGradient(ctx, COLORS.cyan),
+      borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: true
+    }];
+    extraPlugins = [{
+      id: 'rsiLines',
+      beforeDraw(chart) {
+        const {ctx, chartArea, scales} = chart;
+        if (!scales.y) return;
+        const y70 = scales.y.getPixelForValue(70);
+        const y30 = scales.y.getPixelForValue(30);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,77,109,0.3)';
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(chartArea.left, y70); ctx.lineTo(chartArea.right, y70); ctx.stroke();
+        ctx.strokeStyle = 'rgba(37,232,153,0.3)';
+        ctx.beginPath(); ctx.moveTo(chartArea.left, y30); ctx.lineTo(chartArea.right, y30); ctx.stroke();
+        ctx.restore();
+      }
+    }];
+  } else if (currentIndicator === 'macd') {
+    datasets = [
+      { label: 'DIF', data: cd.DIF, borderColor: COLORS.amber, borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+      { label: 'DEA', data: cd.DEA, borderColor: COLORS.cyan, borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+      { label: 'MACD柱', data: cd.MACD_HIST, type: 'bar',
+        backgroundColor: cd.MACD_HIST.map(v => v !== null && v < 0 ? 'rgba(37,232,153,0.5)' : 'rgba(255,77,109,0.5)'),
+        borderColor: cd.MACD_HIST.map(v => v !== null && v < 0 ? COLORS.down : COLORS.up),
+        borderWidth: 0.5 }
+    ];
+  } else if (currentIndicator === 'boll') {
+    datasets = [
+      { label: '收盘价', data: cd.close, borderColor: COLORS.text, borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+      { label: '上轨', data: cd.BOLL_UPPER, borderColor: 'rgba(255,77,109,0.5)', borderWidth: 1, pointRadius: 0, borderDash: [4,4], tension: 0.3 },
+      { label: '中轨', data: cd.BOLL_MID, borderColor: 'rgba(255,179,0,0.5)', borderWidth: 1, pointRadius: 0, borderDash: [4,4], tension: 0.3 },
+      { label: '下轨', data: cd.BOLL_LOWER, borderColor: 'rgba(37,232,153,0.5)', borderWidth: 1, pointRadius: 0, borderDash: [4,4], tension: 0.3 }
+    ];
+  } else if (currentIndicator === 'obv') {
+    datasets = [
+      { label: 'OBV', data: cd.OBV, borderColor: COLORS.purple, backgroundColor: makeGradient(ctx, COLORS.purple), borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: true, yAxisID: 'y' },
+      { label: '收盘价', data: cd.close, borderColor: COLORS.amber, borderWidth: 1, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
+    ];
+  }
+
+  const config = {
+    type: chartType,
+    data: { labels: dates, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { labels: { font: { size: 11 } } },
+        tooltip: {
+          backgroundColor: 'rgba(12,17,24,0.95)', borderColor: COLORS.cyan, borderWidth: 1,
+          titleFont: { size: 12 }, bodyFont: { size: 12 }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+        y: { position: 'left', grid: { color: 'rgba(120,160,200,0.05)' } }
+      }
+    },
+    plugins: extraPlugins
+  };
+
+  if (currentIndicator === 'obv') {
+    config.options.scales.y1 = {
+      position: 'right', grid: { display: false },
+      ticks: { color: COLORS.amber }
+    };
+    config.options.scales.y.ticks = { color: COLORS.purple };
+  }
+
+  if (currentIndicator === 'macd') {
+    config.options.scales.y.ticks = { callback: v => v.toFixed(3) };
+  }
+
+  // Add vertical line plugin for selected date
+  config.plugins.push({
+    id: 'selectedDate',
+    afterDraw(chart) {
+      if (currentDateIdx < 0) return;
+      const xScale = chart.scales.x;
+      const x = xScale.getPixelForValue(currentDateIdx);
+      const { top, bottom } = chart.chartArea;
+      chart.ctx.save();
+      chart.ctx.strokeStyle = 'rgba(0,229,255,0.6)';
+      chart.ctx.lineWidth = 1.5;
+      chart.ctx.setLineDash([4, 4]);
+      chart.ctx.beginPath();
+      chart.ctx.moveTo(x, top);
+      chart.ctx.lineTo(x, bottom);
+      chart.ctx.stroke();
+      chart.ctx.restore();
+    }
+  });
+
+  mainChart = new Chart(ctx, config);
+}
+
+// ============================================================
+// JUDGE LOGIC
+// ============================================================
+function analyzeIndicator(idx) {
+  const sd = getStockData();
+  const cd = sd.chart_data;
+  const date = cd.dates[idx];
+  const close = cd.close[idx];
+  let analysis = { date, close, correct: 'buy', reason: '', laowang: '' };
+
+  if (currentIndicator === 'rsi') {
+    const rsi = cd.RSI_14[idx];
+    if (rsi === null) { analysis.correct = 'hold'; analysis.reason = '该日期RSI数据不足，无法判断。'; }
+    else if (rsi > 70) { analysis.correct = 'sell'; analysis.reason = `RSI = ${rsi.toFixed(2)}，超过70的超买线。买方力量过强，价格可能即将回调。`; analysis.laowang = 'RSI都超过70了，西瓜价格涨得太猛，再涨没人买了，该卖了。'; }
+    else if (rsi < 30) { analysis.correct = 'buy'; analysis.reason = `RSI = ${rsi.toFixed(2)}，低于30的超卖线。卖方力量过强，价格可能即将反弹。`; analysis.laowang = 'RSI不到30，大家都吓得不敢买西瓜了，反而是抄底的好时机。'; }
+    else if (rsi > 50) { analysis.correct = 'buy'; analysis.reason = `RSI = ${rsi.toFixed(2)}，处于50-70之间，多头略占优势，趋势偏强。`; analysis.laowang = 'RSI在50以上，买方力量稍强，可以持有或小仓位买入。'; }
+    else { analysis.correct = 'sell'; analysis.reason = `RSI = ${rsi.toFixed(2)}，处于30-50之间，空头略占优势，趋势偏弱。`; analysis.laowang = 'RSI在50以下，卖方力量稍强，谨慎为主。'; }
+  } else if (currentIndicator === 'macd') {
+    const dif = cd.DIF[idx], dea = cd.DEA[idx], hist = cd.MACD_HIST[idx];
+    if (dif === null) { analysis.correct = 'hold'; analysis.reason = '该日期MACD数据不足。'; }
+    else if (dif > dea && dif > 0) { analysis.correct = 'buy'; analysis.reason = `DIF(${dif.toFixed(4)}) > DEA(${dea.toFixed(4)})，且DIF在零轴上方。多头强势，金叉状态，趋势向上。`; analysis.laowang = '白线在黄线上面，还在零轴上方，涨势正猛，持有！'; }
+    else if (dif > dea && dif < 0) { analysis.correct = 'buy'; analysis.reason = `DIF(${dif.toFixed(4)}) > DEA(${dea.toFixed(4)})，金叉形成中，虽然仍在零轴下方，但下跌动能减弱。`; analysis.laowang = '虽然还在零轴下面，但白线开始超过黄线了，跌势可能在减缓。'; }
+    else if (dif < dea && dif > 0) { analysis.correct = 'sell'; analysis.reason = `DIF(${dif.toFixed(4)}) < DEA(${dea.toFixed(4)})，死叉形成，多头力量减弱。`; analysis.laowang = '白线掉到黄线下面了，涨势在减速，该考虑卖了。'; }
+    else { analysis.correct = 'sell'; analysis.reason = `DIF(${dif.toFixed(4)}) < DEA(${dea.toFixed(4)})，且在零轴下方。空头强势，死叉状态，趋势向下。`; analysis.laowang = '白线在黄线下面，还在零轴下方，跌势正猛，别接飞刀！'; }
+  } else if (currentIndicator === 'boll') {
+    const upper = cd.BOLL_UPPER[idx], lower = cd.BOLL_LOWER[idx], mid = cd.BOLL_MID[idx];
+    if (upper === null) { analysis.correct = 'hold'; analysis.reason = '该日期布林带数据不足。'; }
+    else if (close > upper) { analysis.correct = 'sell'; analysis.reason = `收盘价(${close})突破上轨(${upper.toFixed(2)})，处于超买区。但注意：在单边强势行情中，贴着上轨走也可能是趋势强劲的信号。`; analysis.laowang = '价格突破了上轨！但记住我的教训——单边行情里上轨是风向标不是天花板。得看其他指标配合。'; }
+    else if (close < lower) { analysis.correct = 'buy'; analysis.reason = `收盘价(${close})跌破下轨(${lower.toFixed(2)})，处于超卖区，可能反弹。`; analysis.laowang = '价格跌破了下轨，西瓜卖太便宜了，可能要反弹。'; }
+    else if (close > mid) { analysis.correct = 'buy'; analysis.reason = `收盘价(${close})在中轨(${mid.toFixed(2)})上方，处于多头区域。`; analysis.laowang = '价格在中轨上面，偏强势，可以持有。'; }
+    else { analysis.correct = 'sell'; analysis.reason = `收盘价(${close})在中轨(${mid.toFixed(2)})下方，处于空头区域。`; analysis.laowang = '价格在中轨下面，偏弱势，谨慎为主。'; }
+  } else if (currentIndicator === 'obv') {
+    const obv = cd.OBV[idx];
+    // Look at OBV trend (compare with 5 days ago)
+    const prevIdx = Math.max(0, idx - 5);
+    const obvPrev = cd.OBV[prevIdx];
+    const closePrev = cd.close[prevIdx];
+    if (obv === null) { analysis.correct = 'hold'; analysis.reason = '该日期OBV数据不足。'; }
+    else {
+      const obvUp = obv > obvPrev;
+      const priceUp = close > closePrev;
+      if (priceUp && obvUp) { analysis.correct = 'buy'; analysis.reason = `量价配合：价格从${closePrev}涨到${close}，OBV同步上升。资金真实流入，上涨可靠。`; analysis.laowang = '价格涨了，OBV也涨了，量价配合，真涨！放心买。'; }
+      else if (priceUp && !obvUp) { analysis.correct = 'sell'; analysis.reason = `顶背离：价格从${closePrev}涨到${close}，但OBV从${obvPrev.toFixed(0)}下降到${obv.toFixed(0)}。资金在撤退，上涨不可靠。`; analysis.laowang = '价格涨了但OBV在跌，这是顶背离！主力在边拉边出货，赶紧跑！'; }
+      else if (!priceUp && !obvUp) { analysis.correct = 'sell'; analysis.reason = `量价配合：价格从${closePrev}跌到${close}，OBV同步下降。资金真实流出，下跌可靠。`; analysis.laowang = '价格跌了，OBV也跌了，量价配合，真跌！别抄底。'; }
+      else { analysis.correct = 'buy'; analysis.reason = `底背离：价格从${closePrev}跌到${close}，但OBV从${obvPrev.toFixed(0)}上升到${obv.toFixed(0)}。资金在悄悄进场，下跌不可靠。`; analysis.laowang = '价格跌了但OBV在涨，这是底背离！主力在悄悄吸筹，跟着买！'; }
+    }
+  }
+  return analysis;
+}
+
+function showResult(userChoice) {
+  const analysis = analyzeIndicator(currentDateIdx);
+  const resultEl = document.getElementById('result-area');
+  const isCorrect = userChoice === analysis.correct;
+  const stockName = currentStock === 'pingan' ? '平安银行' : '三一重工';
+  const indicatorName = { rsi: 'RSI', macd: 'MACD', boll: '布林带', obv: 'OBV' }[currentIndicator];
+
+  resultEl.className = 'result-area show ' + (isCorrect ? 'correct' : 'wrong');
+  resultEl.innerHTML = `
+    <h4>${isCorrect ? '✓ 判断正确！' : '✗ 判断有偏差'}</h4>
+    <p><strong>股票：</strong>${stockName} · <strong>指标：</strong>${indicatorName} · <strong>日期：</strong>${analysis.date} · <strong>收盘价：</strong>${analysis.close}</p>
+    <p><strong>分析：</strong>${analysis.reason}</p>
+    ${analysis.laowang ? `<div class="laowang">${analysis.laowang}</div>` : ''}
+  `;
+}
+
+// ============================================================
+// CODE BLOCK DISPLAY
+// ============================================================
+function renderCodeBlock() {
+  const codes = {
+    rsi: `<span class="com"># RSI 相对强弱指标</span>
+<span class="kw">def</span> <span class="fn">calc_rsi</span>(close, period=<span class="num">14</span>):
+    delta = close.diff()
+    gain = delta.<span class="fn">where</span>(delta > <span class="num">0</span>, <span class="num">0.0</span>)
+    loss = (-delta).<span class="fn">where</span>(delta < <span class="num">0</span>, <span class="num">0.0</span>)
+    avg_gain = gain.<span class="fn">ewm</span>(alpha=<span class="num">1</span>/period, min_periods=period).<span class="fn">mean</span>()
+    avg_loss = loss.<span class="fn">ewm</span>(alpha=<span class="num">1</span>/period, min_periods=period).<span class="fn">mean</span>()
+    rs = avg_gain / avg_loss
+    <span class="kw">return</span> <span class="num">100</span> - (<span class="num">100</span> / (<span class="num">1</span> + rs))`,
+    macd: `<span class="com"># MACD 异同移动平均</span>
+<span class="kw">def</span> <span class="fn">calc_macd</span>(close, fast=<span class="num">12</span>, slow=<span class="num">26</span>, signal=<span class="num">9</span>):
+    ema_fast = close.<span class="fn">ewm</span>(span=fast, adjust=<span class="kw">False</span>).<span class="fn">mean</span>()
+    ema_slow = close.<span class="fn">ewm</span>(span=slow, adjust=<span class="kw">False</span>).<span class="fn">mean</span>()
+    dif = ema_fast - ema_slow          <span class="com"># 白线 DIF</span>
+    dea = dif.<span class="fn">ewm</span>(span=signal, adjust=<span class="kw">False</span>).<span class="fn">mean</span>()  <span class="com"># 黄线 DEA</span>
+    hist = (dif - dea) * <span class="num">2</span>           <span class="com"># 柱状图 (A股惯例)</span>
+    <span class="kw">return</span> dif, dea, hist`,
+    boll: `<span class="com"># 布林带 Bollinger Bands</span>
+<span class="kw">def</span> <span class="fn">calc_bollinger</span>(close, period=<span class="num">20</span>, num_std=<span class="num">2</span>):
+    mid = close.<span class="fn">rolling</span>(window=period).<span class="fn">mean</span>()      <span class="com"># 中轨</span>
+    std = close.<span class="fn">rolling</span>(window=period).<span class="fn">std</span>()        <span class="com"># 标准差</span>
+    upper = mid + num_std * std          <span class="com"># 上轨</span>
+    lower = mid - num_std * std          <span class="com"># 下轨</span>
+    <span class="kw">return</span> mid, upper, lower`,
+    obv: `<span class="com"># OBV 能量潮</span>
+<span class="kw">def</span> <span class="fn">calc_obv</span>(close, vol):
+    direction = close.<span class="fn">diff</span>().<span class="fn">apply</span>(
+        <span class="kw">lambda</span> x: <span class="num">1</span> <span class="kw">if</span> x > <span class="num">0</span> <span class="kw">else</span> (-<span class="num">1</span> <span class="kw">if</span> x < <span class="num">0</span> <span class="kw">else</span> <span class="num">0</span>)
+    )
+    <span class="kw">return</span> (direction * vol).<span class="fn">cumsum</span>()`
+  };
+  document.getElementById('code-block').innerHTML = `<span class="com"># Python 实现</span>\n${codes[currentIndicator]}`;
+}
+
+// ============================================================
+// SIGNALS LIST
+// ============================================================
+function renderSignals() {
+  const sd = getStockData();
+  if (!sd || !sd.signals) return;
+  const list = document.getElementById('signals-list');
+  const typeMap = {
+    rsi_overbought: { label: 'RSI超买', color: 'var(--up)' },
+    rsi_oversold: { label: 'RSI超卖', color: 'var(--down)' },
+    macd_golden_cross: { label: 'MACD金叉', color: 'var(--up)' },
+    macd_death_cross: { label: 'MACD死叉', color: 'var(--down)' },
+    boll_breakout_up: { label: '布林突破上轨', color: 'var(--amber)' },
+    boll_breakout_down: { label: '布林跌破下轨', color: 'var(--purple)' }
+  };
+  list.innerHTML = sd.signals.slice(0, 20).map(s => {
+    const info = typeMap[s.type] || { label: s.type, color: 'var(--text-dim)' };
+    return `<span style="font-size:11px; padding:4px 10px; border:1px solid ${info.color}30; border-radius:4px; color:${info.color}; background:${info.color}08; cursor:pointer" 
+      onclick="jumpToSignal(${s.idx})">${info.label} · ${s.date}</span>`;
+  }).join('');
+}
+
+function jumpToSignal(idx) {
+  currentDateIdx = idx;
+  document.getElementById('date-slider').value = idx;
+  updateDateDisplay();
+  if (mainChart) mainChart.update();
+  document.getElementById('result-area').classList.remove('show');
+}
+
+// ============================================================
+// DATE SLIDER
+// ============================================================
+function updateDateDisplay() {
+  const sd = getStockData();
+  if (!sd) return;
+  const dates = sd.chart_data.dates;
+  const maxIdx = dates.length - 1;
+  document.getElementById('date-slider').max = maxIdx;
+  if (currentDateIdx > maxIdx) currentDateIdx = Math.floor(maxIdx / 2);
+  document.getElementById('date-display').textContent = dates[currentDateIdx] || '--';
+}
+
+// ============================================================
+// RSI CALCULATION IN JS (for param slider)
+// ============================================================
+function calcRSIJS(closes, period) {
+  const rsi = new Array(closes.length).fill(null);
+  if (closes.length < period + 1) return rsi;
+  let avgGain = 0, avgLoss = 0;
+  for (let i = 1; i <= period; i++) {
+    const diff = closes[i] - closes[i-1];
+    if (diff > 0) avgGain += diff; else avgLoss += Math.abs(diff);
+  }
+  avgGain /= period;
+  avgLoss /= period;
+  const rs0 = avgLoss === 0 ? 100 : avgGain / avgLoss;
+  rsi[period] = 100 - 100 / (1 + rs0);
+  for (let i = period + 1; i < closes.length; i++) {
+    const diff = closes[i] - closes[i-1];
+    const gain = diff > 0 ? diff : 0;
+    const loss = diff < 0 ? Math.abs(diff) : 0;
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+    rsi[i] = 100 - 100 / (1 + rs);
+  }
+  return rsi;
+}
+
+function calcBollingerJS(closes, period, numStd) {
+  const mid = new Array(closes.length).fill(null);
+  const upper = new Array(closes.length).fill(null);
+  const lower = new Array(closes.length).fill(null);
+  for (let i = period - 1; i < closes.length; i++) {
+    let sum = 0;
+    for (let j = i - period + 1; j <= i; j++) sum += closes[j];
+    const m = sum / period;
+    let variance = 0;
+    for (let j = i - period + 1; j <= i; j++) variance += (closes[j] - m) ** 2;
+    const std = Math.sqrt(variance / period);
+    mid[i] = m;
+    upper[i] = m + numStd * std;
+    lower[i] = m - numStd * std;
+  }
+  return { mid, upper, lower };
+}
+
+// ============================================================
+// PARAM SENSITIVITY CHARTS
+// ============================================================
+let paramStock = 'pingan';
+
+function renderRsiParamChart() {
+  const sd = DATA[`${paramStock}_indicators`];
+  if (!sd) return;
+  const cd = sd.chart_data;
+  const closes = cd.close.map(v => v || 0);
+  const period = parseInt(document.getElementById('rsi-period-slider').value);
+  document.getElementById('rsi-period-val').textContent = period;
+
+  const rsiCustom = calcRSIJS(closes, period);
+  const ctx = document.getElementById('rsiParamChart').getContext('2d');
+
+  if (rsiParamChart) rsiParamChart.destroy();
+
+  rsiParamChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: cd.dates,
+      datasets: [
+        { label: `RSI(${period}) 当前`, data: rsiCustom, borderColor: COLORS.cyan, borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false },
+        { label: 'RSI(14) 经典', data: cd.RSI_14, borderColor: COLORS.amber, borderWidth: 1, pointRadius: 0, tension: 0.3, borderDash: [3,3], fill: false },
+        ...(period !== 7 ? [{ label: 'RSI(7) 短线', data: cd.RSI_7, borderColor: 'rgba(255,77,109,0.5)', borderWidth: 1, pointRadius: 0, tension: 0.3, borderDash: [2,2], fill: false }] : []),
+        ...(period !== 21 ? [{ label: 'RSI(21) 长线', data: cd.RSI_21, borderColor: 'rgba(37,232,153,0.5)', borderWidth: 1, pointRadius: 0, tension: 0.3, borderDash: [2,2], fill: false }] : [])
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { labels: { font: { size: 11 } } },
+        tooltip: { backgroundColor: 'rgba(12,17,24,0.95)', borderColor: COLORS.cyan, borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+        y: { min: 0, max: 100, grid: { color: 'rgba(120,160,200,0.05)' } }
+      }
+    }
+  });
+}
+
+function renderBollParamChart() {
+  const sd = DATA[`${paramStock}_indicators`];
+  if (!sd) return;
+  const cd = sd.chart_data;
+  const closes = cd.close.map(v => v || 0);
+  const numStd = parseFloat(document.getElementById('boll-std-slider').value);
+  document.getElementById('boll-std-val').textContent = numStd.toFixed(1);
+
+  const bollCustom = calcBollingerJS(closes, 20, numStd);
+  const ctx = document.getElementById('bollParamChart').getContext('2d');
+
+  if (bollParamChart) bollParamChart.destroy();
+
+  bollParamChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: cd.dates,
+      datasets: [
+        { label: '收盘价', data: cd.close, borderColor: COLORS.text, borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: `上轨 (±${numStd.toFixed(1)}σ)`, data: bollCustom.upper, borderColor: 'rgba(255,77,109,0.7)', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: `下轨 (±${numStd.toFixed(1)}σ)`, data: bollCustom.lower, borderColor: 'rgba(37,232,153,0.7)', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: '上轨 (±2.0σ) 经典', data: cd.BOLL_UPPER, borderColor: 'rgba(255,77,109,0.3)', borderWidth: 1, pointRadius: 0, tension: 0.3, borderDash: [3,3] },
+        { label: '下轨 (±2.0σ) 经典', data: cd.BOLL_LOWER, borderColor: 'rgba(37,232,153,0.3)', borderWidth: 1, pointRadius: 0, tension: 0.3, borderDash: [3,3] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { labels: { font: { size: 11 } } },
+        tooltip: { backgroundColor: 'rgba(12,17,24,0.95)', borderColor: COLORS.cyan, borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+        y: { grid: { color: 'rgba(120,160,200,0.05)' } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('stock-selector').addEventListener('click', (e) => {
+  if (e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('#stock-selector button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  currentStock = e.target.dataset.stock;
+  currentDateIdx = Math.floor((DATA[`${currentStock}_indicators`].chart_data.dates.length - 1) / 2);
+  updateDateDisplay();
+  renderMainChart();
+  renderSignals();
+  renderCodeBlock();
+  document.getElementById('result-area').classList.remove('show');
+});
+
+document.getElementById('indicator-selector').addEventListener('click', (e) => {
+  if (e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('#indicator-selector button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  currentIndicator = e.target.dataset.indicator;
+  renderMainChart();
+  renderCodeBlock();
+  document.getElementById('result-area').classList.remove('show');
+});
+
+document.getElementById('date-slider').addEventListener('input', (e) => {
+  currentDateIdx = parseInt(e.target.value);
+  updateDateDisplay();
+  if (mainChart) mainChart.update();
+  document.getElementById('result-area').classList.remove('show');
+});
+
+document.getElementById('btn-buy').addEventListener('click', () => showResult('buy'));
+document.getElementById('btn-sell').addEventListener('click', () => showResult('sell'));
+
+document.getElementById('param-stock-selector').addEventListener('click', (e) => {
+  if (e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('#param-stock-selector button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  paramStock = e.target.dataset.stock;
+  renderRsiParamChart();
+  renderBollParamChart();
+});
+
+document.getElementById('rsi-period-slider').addEventListener('input', renderRsiParamChart);
+document.getElementById('boll-std-slider').addEventListener('input', renderBollParamChart);
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  await loadData();
+  renderDiagnostics();
+  currentDateIdx = Math.floor((DATA.pingan_indicators.chart_data.dates.length - 1) / 2);
+  updateDateDisplay();
+  renderMainChart();
+  renderSignals();
+  renderCodeBlock();
+  renderRsiParamChart();
+  renderBollParamChart();
+}
+
+init();
+</script>
+</body>
+</html>
