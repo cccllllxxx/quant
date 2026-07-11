@@ -1,0 +1,47 @@
+{
+  "stock": "三一重工",
+  "stop": 2,
+  "atr_window": 20,
+  "rows": [
+    {
+      "entry": 10,
+      "exit": 5,
+      "total_with": -0.1826979587701072,
+      "mdd_with": 0.3304204329064714,
+      "sharpe_with": -0.18967483843920988,
+      "win_rate": 0.28125,
+      "n_trades": 32,
+      "stop_exit_ratio": 0.375
+    },
+    {
+      "entry": 20,
+      "exit": 10,
+      "total_with": 0.026959893964237036,
+      "mdd_with": 0.18482377513375603,
+      "sharpe_with": 0.1211262907469425,
+      "win_rate": 0.35294117647058826,
+      "n_trades": 17,
+      "stop_exit_ratio": 0.29411764705882354
+    },
+    {
+      "entry": 40,
+      "exit": 20,
+      "total_with": 0.06353338208975101,
+      "mdd_with": 0.15161379937201913,
+      "sharpe_with": 0.16954964181328566,
+      "win_rate": 0.4444444444444444,
+      "n_trades": 9,
+      "stop_exit_ratio": 0.5555555555555556
+    },
+    {
+      "entry": 55,
+      "exit": 27,
+      "total_with": -0.10048334408798776,
+      "mdd_with": 0.20528559930203472,
+      "sharpe_with": -0.10122574291405759,
+      "win_rate": 0.3,
+      "n_trades": 10,
+      "stop_exit_ratio": 0.7
+    }
+  ]
+}

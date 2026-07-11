@@ -1,0 +1,227 @@
+{
+  "stocks": {
+    "maotai": {
+      "name": "贵州茅台",
+      "code": "600519.SH",
+      "systems": {
+        "S1": {
+          "with": {
+            "total_return": -0.19365835852877455,
+            "annual_return": -0.062246620874855774,
+            "mdd": 0.23082291590097415,
+            "sharpe": -0.5493233588131072,
+            "win_rate": 0.23076923076923078,
+            "profit_loss_ratio": 0.7620318636577795,
+            "n_trades": 13,
+            "n_stop_exits": 9,
+            "stop_exit_ratio": 0.6923076923076923,
+            "avg_hold_days": 10.615384615384615,
+            "max_consec_loss": 5,
+            "avg_entry_atr": 24.531264999999998
+          },
+          "without": {
+            "total_return": -0.17258198821843518,
+            "annual_return": -0.054994208912892084,
+            "mdd": 0.2142967569729256,
+            "sharpe": -0.4766605530260556,
+            "win_rate": 0.23076923076923078,
+            "profit_loss_ratio": 0.9037882940393768,
+            "n_trades": 13,
+            "n_stop_exits": 9,
+            "stop_exit_ratio": 0.6923076923076923,
+            "avg_hold_days": 10.615384615384615,
+            "max_consec_loss": 5,
+            "avg_entry_atr": 24.531264999999998
+          },
+          "bh": -0.2206032362791066,
+          "entry": 20,
+          "exit": 10
+        },
+        "S2": {
+          "with": {
+            "total_return": -0.22248590692137427,
+            "annual_return": -0.0723847667217401,
+            "mdd": 0.24883199022006042,
+            "sharpe": -1.1110011667209345,
+            "win_rate": 0.0,
+            "profit_loss_ratio": 0.0,
+            "n_trades": 6,
+            "n_stop_exits": 6,
+            "stop_exit_ratio": 1.0,
+            "avg_hold_days": 9.333333333333334,
+            "max_consec_loss": 6,
+            "avg_entry_atr": 28.155020833333328
+          },
+          "without": {
+            "total_return": -0.2126390094038232,
+            "annual_return": -0.06889257844693752,
+            "mdd": 0.23992176093409057,
+            "sharpe": -1.0522815063841453,
+            "win_rate": 0.0,
+            "profit_loss_ratio": 0.0,
+            "n_trades": 6,
+            "n_stop_exits": 6,
+            "stop_exit_ratio": 1.0,
+            "avg_hold_days": 9.333333333333334,
+            "max_consec_loss": 6,
+            "avg_entry_atr": 28.155020833333328
+          },
+          "bh": -0.2206032362791066,
+          "entry": 55,
+          "exit": 20
+        }
+      }
+    },
+    "pingan": {
+      "name": "平安银行",
+      "code": "000001.SZ",
+      "systems": {
+        "S1": {
+          "with": {
+            "total_return": -0.3008333503305126,
+            "annual_return": -0.0796863700636884,
+            "mdd": 0.3215573643569072,
+            "sharpe": -0.6730300039418391,
+            "win_rate": 0.13043478260869565,
+            "profit_loss_ratio": 2.2827935370546264,
+            "n_trades": 23,
+            "n_stop_exits": 17,
+            "stop_exit_ratio": 0.7391304347826086,
+            "avg_hold_days": 10.608695652173912,
+            "max_consec_loss": 11,
+            "avg_entry_atr": 0.2060161524798072
+          },
+          "without": {
+            "total_return": -0.27059282792235606,
+            "annual_return": -0.070599310734476,
+            "mdd": 0.30081737856853974,
+            "sharpe": -0.5870236693188899,
+            "win_rate": 0.13043478260869565,
+            "profit_loss_ratio": 2.541502856098589,
+            "n_trades": 23,
+            "n_stop_exits": 17,
+            "stop_exit_ratio": 0.7391304347826086,
+            "avg_hold_days": 10.608695652173912,
+            "max_consec_loss": 11,
+            "avg_entry_atr": 0.2060161524798072
+          },
+          "bh": -0.24256905635683956,
+          "entry": 20,
+          "exit": 10
+        },
+        "S2": {
+          "with": {
+            "total_return": -0.10369839068876563,
+            "annual_return": -0.02508384407676778,
+            "mdd": 0.1462399623967836,
+            "sharpe": -0.22488449605288416,
+            "win_rate": 0.25,
+            "profit_loss_ratio": 1.0171375267340006,
+            "n_trades": 8,
+            "n_stop_exits": 5,
+            "stop_exit_ratio": 0.625,
+            "avg_hold_days": 15.875,
+            "max_consec_loss": 4,
+            "avg_entry_atr": 0.22098491880862975
+          },
+          "without": {
+            "total_return": -0.09049840629775774,
+            "annual_return": -0.021770888758702145,
+            "mdd": 0.141269996735651,
+            "sharpe": -0.18850233552369797,
+            "win_rate": 0.25,
+            "profit_loss_ratio": 1.1713654466145267,
+            "n_trades": 8,
+            "n_stop_exits": 5,
+            "stop_exit_ratio": 0.625,
+            "avg_hold_days": 15.875,
+            "max_consec_loss": 4,
+            "avg_entry_atr": 0.22098491880862975
+          },
+          "bh": -0.24256905635683956,
+          "entry": 55,
+          "exit": 20
+        }
+      }
+    },
+    "sany": {
+      "name": "三一重工",
+      "code": "600031.SH",
+      "systems": {
+        "S1": {
+          "with": {
+            "total_return": 0.026959893964237036,
+            "annual_return": 0.006192136139631765,
+            "mdd": 0.18482377513375603,
+            "sharpe": 0.1211262907469425,
+            "win_rate": 0.35294117647058826,
+            "profit_loss_ratio": 2.129894721278873,
+            "n_trades": 17,
+            "n_stop_exits": 5,
+            "stop_exit_ratio": 0.29411764705882354,
+            "avg_hold_days": 20.11764705882353,
+            "max_consec_loss": 4,
+            "avg_entry_atr": 0.4701535294117646
+          },
+          "without": {
+            "total_return": 0.05980342824434537,
+            "annual_return": 0.01356916335361169,
+            "mdd": 0.1722436753600498,
+            "sharpe": 0.16380370783087286,
+            "win_rate": 0.35294117647058826,
+            "profit_loss_ratio": 2.383298062666152,
+            "n_trades": 17,
+            "n_stop_exits": 5,
+            "stop_exit_ratio": 0.29411764705882354,
+            "avg_hold_days": 20.11764705882353,
+            "max_consec_loss": 4,
+            "avg_entry_atr": 0.4701535294117646
+          },
+          "bh": -0.16809851088201588,
+          "entry": 20,
+          "exit": 10
+        },
+        "S2": {
+          "with": {
+            "total_return": -0.10130493773210225,
+            "annual_return": -0.024480362709613623,
+            "mdd": 0.22298103639755318,
+            "sharpe": -0.1171722618829629,
+            "win_rate": 0.3,
+            "profit_loss_ratio": 1.2092997407253325,
+            "n_trades": 10,
+            "n_stop_exits": 7,
+            "stop_exit_ratio": 0.7,
+            "avg_hold_days": 18.7,
+            "max_consec_loss": 4,
+            "avg_entry_atr": 0.4787164999999998
+          },
+          "without": {
+            "total_return": -0.08604280855386304,
+            "annual_return": -0.020660951450263254,
+            "mdd": 0.2164394573579923,
+            "sharpe": -0.08813492692104963,
+            "win_rate": 0.3,
+            "profit_loss_ratio": 1.349088791699256,
+            "n_trades": 10,
+            "n_stop_exits": 7,
+            "stop_exit_ratio": 0.7,
+            "avg_hold_days": 18.7,
+            "max_consec_loss": 4,
+            "avg_entry_atr": 0.4787164999999998
+          },
+          "bh": -0.16809851088201588,
+          "entry": 55,
+          "exit": 20
+        }
+      }
+    }
+  },
+  "qfq_diff": {
+    "maotai": 0.0008868000002166809,
+    "pingan": 1.7763568394002505e-15,
+    "sany": 5.6799999999412876e-05
+  },
+  "default_stop": 2,
+  "atr_window": 20
+}
