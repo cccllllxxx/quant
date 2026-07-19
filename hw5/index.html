@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI交易引擎：机器学习分类算法 · HW5</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-0:#070a10; --bg-1:#0c1118; --bg-2:#111923;
+  --panel:rgba(16,24,36,0.82); --panel-warm:rgba(28,22,18,0.82);
+  --edge:rgba(0,229,255,0.14); --edge-warm:rgba(255,179,0,0.16);
+  --grid:rgba(120,160,200,0.05);
+  --text:#e8eef5; --text-dim:#8a9aae; --text-mute:#566578;
+  --cyan:#00e5ff; --amber:#ffb300; --warm-red:#e85d5d;
+  --up:#ff4d6d; --down:#25e899; --purple:#a07cff;
+  --shadow:0 8px 40px rgba(0,229,255,0.06);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg-0); color:var(--text);
+  font-family:"Inter","SF Pro Text","Source Han Sans SC","Microsoft YaHei","PingFang SC",sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+body{
+  min-height:100vh; background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(0,229,255,0.08), transparent 60%),
+    radial-gradient(900px 700px at 95% 5%, rgba(255,179,0,0.06), transparent 60%),
+    radial-gradient(700px 600px at 50% 100%, rgba(232,93,93,0.05), transparent 70%),
+    var(--bg-0); background-attachment:fixed;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:60px 60px;
+  -webkit-mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 80%);
+  mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 80%);
+}
+::selection{background:var(--cyan); color:#000}
+a{color:var(--cyan); text-decoration:none}
+.container{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 28px}
+
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(7,10,16,0.88); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--edge); height:52px;
+  display:flex; align-items:center;
+}
+.nav__inner{max-width:1180px; margin:0 auto; padding:0 28px; display:flex; align-items:center; gap:28px; width:100%}
+.nav__logo{font-size:14px; font-weight:700; color:var(--amber); white-space:nowrap}
+.nav__links{display:flex; gap:20px; font-size:12px; color:var(--text-dim)}
+.nav__links a{color:var(--text-dim); transition:color .2s}
+.nav__links a:hover{color:var(--cyan)}
+@media(max-width:680px){.nav__links{display:none}}
+
+.hero{position:relative; padding:120px 0 80px; border-bottom:1px solid var(--edge); overflow:hidden}
+.hero__deco{position:absolute; top:40%; right:-100px; width:400px; height:400px; border-radius:50%;
+  background:radial-gradient(circle, rgba(0,229,255,0.12), transparent 70%); pointer-events:none; animation:float 8s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)}}
+.hero__tag{display:inline-flex; align-items:center; gap:10px; font-size:11px; letter-spacing:0.3em; text-transform:uppercase; color:var(--amber);
+  padding:6px 14px; border:1px solid rgba(255,179,0,0.35); border-radius:2px; background:rgba(255,179,0,0.05)}
+.hero__tag::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 8px var(--amber); animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)}}
+.hero__title{margin-top:28px; font-size:clamp(32px,5.5vw,56px); font-weight:800; letter-spacing:-0.02em; line-height:1.15;
+  background:linear-gradient(180deg,#fff 0%,#a0b3c7 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+.hero__sub{margin-top:16px; font-size:clamp(16px,2.2vw,22px); color:var(--text-dim); font-weight:400}
+.hero__sub .ac{color:var(--amber)}
+.hero__desc{margin-top:24px; max-width:680px; color:var(--text-dim); font-size:14px; line-height:1.9}
+.hero__meta{margin-top:40px; display:flex; flex-wrap:wrap; gap:28px; font-size:12px; color:var(--text-mute)}
+.hero__meta .k{letter-spacing:0.16em; text-transform:uppercase}
+.hero__meta .v{color:var(--text); margin-left:6px}
+.hero__indicators{margin-top:36px; display:flex; flex-wrap:wrap; gap:10px}
+.hero__indicators span{font-size:11px; padding:4px 12px; border:1px solid var(--edge); border-radius:20px; color:var(--text-dim); background:rgba(0,229,255,0.04)}
+
+section{padding:72px 0; border-bottom:1px solid var(--edge); position:relative}
+.sec-head{margin-bottom:48px}
+.sec-label{font-size:11px; letter-spacing:0.3em; text-transform:uppercase; color:var(--cyan); margin-bottom:12px}
+.sec-label.warm{color:var(--amber)}
+.sec-title{font-size:clamp(22px,3vw,32px); font-weight:700; color:var(--text); letter-spacing:-0.01em}
+.sec-desc{margin-top:12px; color:var(--text-dim); font-size:14px; max-width:720px}
+
+.story-card{background:var(--panel-warm); border:1px solid var(--edge-warm); border-radius:12px;
+  padding:36px; margin-bottom:28px; position:relative; overflow:hidden; transition:border-color .3s, box-shadow .3s}
+.story-card:hover{border-color:rgba(255,179,0,0.3); box-shadow:0 8px 40px rgba(255,179,0,0.06)}
+.story-card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg, var(--amber), transparent)}
+.story-card__chap{font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:var(--amber); margin-bottom:8px}
+.story-card__title{font-size:22px; font-weight:700; color:var(--text); margin-bottom:16px}
+.story-card__body{color:var(--text-dim); font-size:15px; line-height:2.0}
+.story-card__body p{margin-bottom:12px}
+.story-card__body strong{color:var(--text)}
+.story-card__body .ac{color:var(--amber); font-weight:600}
+.story-card__body .up{color:var(--up)}
+.story-card__body .down{color:var(--down)}
+.formula{font-family:"JetBrains Mono","SF Mono",Consolas,monospace; color:var(--cyan); font-size:13px; margin:14px 0; padding:10px 14px;
+  background:rgba(0,229,255,0.06); border-radius:4px; border:1px solid rgba(0,229,255,0.1)}
+.pros-cons{display:flex; gap:16px; margin-top:18px; flex-wrap:wrap}
+.pros-cons div{flex:1; min-width:200px; padding:14px 16px; border-radius:8px; font-size:13px; line-height:1.8}
+.pros-cons .pros{background:rgba(37,232,153,0.06); border:1px solid rgba(37,232,153,0.2)}
+.pros-cons .cons{background:rgba(255,77,109,0.06); border:1px solid rgba(255,77,109,0.2)}
+.pros-cons b{display:block; margin-bottom:6px}
+.pros-cons .pros b{color:var(--down)}
+.pros-cons .cons b{color:var(--up)}
+
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+@media(max-width:860px){.grid-3{grid-template-columns:1fr}}
+.mini-card{background:var(--panel); border:1px solid var(--edge); border-radius:12px; padding:26px; transition:border-color .3s, box-shadow .3s}
+.mini-card:hover{border-color:rgba(0,229,255,0.35); box-shadow:0 8px 40px rgba(0,229,255,0.06)}
+.mini-card h3{font-size:17px; font-weight:700; color:var(--text); margin-bottom:10px}
+.mini-card .tag{font-size:11px; color:var(--cyan); letter-spacing:0.1em; text-transform:uppercase}
+.mini-card p{color:var(--text-dim); font-size:13.5px; line-height:1.85; margin-top:8px}
+
+.panel{background:var(--panel); border:1px solid var(--edge); border-radius:12px; padding:32px; margin-bottom:24px; position:relative}
+.panel--warm{background:var(--panel-warm); border-color:var(--edge-warm)}
+.panel__title{font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px}
+.panel__desc{color:var(--text-dim); font-size:13px; margin-bottom:20px}
+
+.data-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+@media(max-width:860px){.data-grid{grid-template-columns:1fr}}
+
+.interactive-controls{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; align-items:center}
+.dataset-toggle{display:flex; gap:0; border:1px solid var(--edge); border-radius:8px; overflow:hidden}
+.dataset-toggle button{padding:10px 20px; background:transparent; border:none; color:var(--text-dim); font-size:13px; cursor:pointer; transition:all .2s; font-family:inherit}
+.dataset-toggle button.active{background:rgba(0,229,255,0.12); color:var(--cyan)}
+.dataset-toggle button:hover{color:var(--text)}
+.chart-container{position:relative; height:440px; background:rgba(5,8,13,0.4); border-radius:8px; padding:16px}
+.chart-note{margin-top:14px; color:var(--text-dim); font-size:13px; line-height:1.8}
+.chart-note .ac{color:var(--amber)}
+
+.cm-wrap{display:grid; grid-template-columns:1fr 1fr; gap:24px}
+@media(max-width:860px){.cm-wrap{grid-template-columns:1fr}}
+.cm-card{background:var(--panel); border:1px solid var(--edge); border-radius:12px; padding:24px}
+.cm-card h4{font-size:15px; color:var(--text); margin-bottom:4px}
+.cm-card .sub{font-size:12px; color:var(--text-mute); margin-bottom:14px}
+.cm-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:260px}
+.cm-cell{border-radius:8px; padding:18px 10px; text-align:center}
+.cm-cell .n{font-size:26px; font-weight:700; font-family:"JetBrains Mono",monospace}
+.cm-cell .l{font-size:11px; color:var(--text-dim); margin-top:4px}
+.cm-cell .r{font-size:10px; color:var(--text-mute); margin-top:2px}
+.cm-tp{background:rgba(37,232,153,0.12); border:1px solid rgba(37,232,153,0.3)} .cm-tp .n{color:var(--down)}
+.cm-tn{background:rgba(37,232,153,0.08); border:1px solid rgba(37,232,153,0.2)} .cm-tn .n{color:#7fe9c0}
+.cm-fp{background:rgba(255,77,109,0.10); border:1px solid rgba(255,77,109,0.3)} .cm-fp .n{color:var(--up)}
+.cm-fn{background:rgba(255,77,109,0.08); border:1px solid rgba(255,77,109,0.2)} .cm-fn .n{color:#ff8aa0}
+.cm-axis{font-size:11px; color:var(--text-mute); text-align:center; margin-top:6px}
+
+.auc-table{width:100%; border-collapse:collapse; margin-top:8px; font-size:14px}
+.auc-table th,.auc-table td{padding:12px 14px; border-bottom:1px solid rgba(120,160,200,0.12); text-align:center}
+.auc-table th{color:var(--text-mute); font-weight:500; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; background:rgba(255,179,0,0.06)}
+.auc-table td:first-child{text-align:left; color:var(--text); font-weight:600}
+.auc-table .num{font-family:"JetBrains Mono",monospace; font-size:15px}
+.auc-good{color:var(--down)} .auc-mid{color:var(--amber)} .auc-bad{color:var(--up)}
+
+.conclusion{color:var(--text-dim); font-size:15px; line-height:2.0; max-width:820px}
+.conclusion p{margin-bottom:14px}
+.conclusion strong{color:var(--text)}
+.conclusion .ac{color:var(--amber)}
+
+.footer{padding:48px 0 32px; text-align:center; color:var(--text-mute); font-size:12px; line-height:1.8}
+.footer .ac{color:var(--amber)}
+
+.reveal{opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease}
+.reveal.visible{opacity:1; transform:translateY(0)}
+.divider{height:1px; background:linear-gradient(90deg, transparent, var(--edge), transparent); margin:48px 0}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__inner">
+    <span class="nav__logo">AI交易引擎</span>
+    <div class="nav__links">
+      <a href="#algo-top">算法讲解</a>
+      <a href="#metric-top">评价指标</a>
+      <a href="#emp-top">实证分析</a>
+      <a href="#concl-top">结论</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero__deco"></div>
+  <div class="container">
+    <span class="hero__tag">HW5 · 机器学习分类算法</span>
+    <h1 class="hero__title">AI交易引擎<br>机器学习算法与场景应用</h1>
+    <p class="hero__sub">用<span class="ac">scikit-learn</span> 把海量数据变成交易信号 — 逻辑回归 · 决策树 · 随机森林</p>
+    <p class="hero__desc">
+      本看板围绕「分类型机器学习算法」展开：先拆解逻辑回归、决策树与随机森林的原理与优劣，
+      再讲解混淆矩阵、ROC 曲线与 AUC 等评价指标。最后以乳腺癌数据集与贵州茅台次日涨跌数据集
+      进行实证，交互式对比三类模型的区分能力。
+    </p>
+    <div class="hero__meta">
+      <div><span class="k">课程</span><span class="v">量化投资策略（TASK5）</span></div>
+      <div><span class="k">数据</span><span class="v">乳腺癌(sklearn) · 茅台日行情</span></div>
+      <div><span class="k">工具</span><span class="v">Python · scikit-learn · Chart.js</span></div>
+    </div>
+    <div class="hero__indicators">
+      <span>逻辑回归</span><span>决策树</span><span>随机森林</span><span>混淆矩阵</span><span>ROC 曲线</span><span>AUC</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 算法讲解 ===== -->
+<div id="algo-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label warm">PART I · 算法讲解</div>
+      <h2 class="sec-title">三类基础分类算法</h2>
+      <p class="sec-desc">分类算法直接输出离散的交易信号（涨/跌、买/卖），与策略执行天然契合。下面逐一拆解其原理与适用边界。</p>
+    </div>
+
+    <div class="story-card reveal">
+      <div class="story-card__chap">算法一</div>
+      <h3 class="story-card__title">逻辑回归 Logistic Regression</h3>
+      <div class="story-card__body">
+        <p>一种<span class="ac">广义线性分类模型</span>。先对特征做线性组合 z = wᵀx + b，再通过 Sigmoid 函数把结果压缩到 (0,1)：</p>
+        <div class="formula">s(z) = 1 / (1 + e^(-z))  →  输出「属于正类」的概率</div>
+        <p>当概率 ≥ 0.5 判为正类，否则为负类。可解释性强、训练快、输出具有概率意义。</p>
+        <div class="pros-cons">
+          <div class="pros"><b>优势</b>系数直接给出特征方向；对线性可分问题高效稳定。</div>
+          <div class="cons"><b>局限</b>只能刻画特征与标签间的线性边界，对非线性关系表达力有限。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card reveal">
+      <div class="story-card__chap">算法二</div>
+      <h3 class="story-card__title">决策树 Decision Tree</h3>
+      <div class="story-card__body">
+        <p>通过<span class="ac">递归选择最优特征与切分点</span>，把样本空间划分成若干矩形区域，每个区域对应一个类别预测。常用指标：</p>
+        <div class="formula">信息增益(ID3) · 信息增益率(C4.5) · 基尼指数(CART)</div>
+        <p>直观易懂，能自动捕捉特征间的非线性交互，但单棵树容易过拟合、泛化较弱。</p>
+        <div class="pros-cons">
+          <div class="pros"><b>优势</b>无需特征缩放；规则可读；天然处理非线性。</div>
+          <div class="cons"><b>局限</b>对训练数据敏感，方差大，易过拟合。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card reveal">
+      <div class="story-card__chap">算法三</div>
+      <h3 class="story-card__title">随机森林 Random Forest</h3>
+      <div class="story-card__body">
+        <p>一种<span class="ac">集成学习方法</span>。通过自助采样（Bagging）构建多棵决策树，每棵树在随机特征子集上训练，最终以投票/平均概率输出：</p>
+        <div class="formula">ŷ = mode{ T₁(x), T₂(x), … , Tₙ(x) }</div>
+        <p>显著降低单棵树的方差，提升稳定性与精度，是表格类数据的强力基线模型。</p>
+        <div class="pros-cons">
+          <div class="pros"><b>优势</b>抗过拟合；精度高；可输出特征重要性。</div>
+          <div class="cons"><b>局限</b>模型庞大、解释性弱于单棵树；训练成本更高。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 评价指标 ===== -->
+<div id="metric-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">PART II · 评价指标</div>
+      <h2 class="sec-title">如何衡量模型好坏</h2>
+      <p class="sec-desc">分类模型的「准不准」不能只看准确率，尤其在正负样本不平衡或代价不对称时。下面三个指标是核心。</p>
+    </div>
+    <div class="grid-3">
+      <div class="mini-card reveal">
+        <div class="tag">Metric 01</div>
+        <h3>混淆矩阵</h3>
+        <p>把预测与真实标签交叉，得到 TP / FP / TN / FN 四个格子，是准确率、精确率、召回率、F1 的计算基础。</p>
+      </div>
+      <div class="mini-card reveal">
+        <div class="tag">Metric 02</div>
+        <h3>ROC 曲线</h3>
+        <p>以假正率 FPR 为横轴、真正率 TPR 为纵轴，随分类阈值变化绘制的曲线；越靠左上角，区分能力越强。</p>
+      </div>
+      <div class="mini-card reveal">
+        <div class="tag">Metric 03</div>
+        <h3>AUC</h3>
+        <p>ROC 曲线下面积，取值 [0,1]。越接近 1 越好；=0.5 相当于随机猜测；直观理解为「正例得分高于负例的概率」。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 实证分析 ===== -->
+<div id="emp-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label warm">PART III · 实证分析</div>
+      <h2 class="sec-title">双数据集实战</h2>
+      <p class="sec-desc">两个数据集、三类模型，80/20 分层抽样划分训练/测试集，统一用 scikit-learn 完成。</p>
+    </div>
+
+    <div class="data-grid">
+      <div class="panel reveal">
+        <div class="panel__title">数据集一 · 乳腺癌（标准示例）</div>
+        <div class="panel__desc">sklearn 内置 load_breast_cancer：569 样本 / 30 医学特征，标签 0=恶性、1=良性（0/1 二分类）。</div>
+        <p style="color:var(--text-dim);font-size:13.5px;line-height:1.9">特征与标签关系明确，是检验分类流程与模型上限的标准教材数据。</p>
+      </div>
+      <div class="panel panel--warm reveal">
+        <div class="panel__title">数据集二 · 股票次日涨跌（量化场景）</div>
+        <div class="panel__desc">读取贵州茅台(600519.SH)日行情，由技术指标（收益率/动量/波动率/成交量变化/均线偏离）构造特征，标签=次日收益率是否 >0。</div>
+        <p style="color:var(--text-dim);font-size:13.5px;line-height:1.9">825 条样本。金融噪声大，是检验模型在真实市场中区分力的压力测试。</p>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:24px">
+      <div class="panel__title">交互式 ROC 曲线</div>
+      <div class="panel__desc">切换数据集，观察三类模型的 ROC 曲线与 AUC。曲线越贴左上角越好。</div>
+      <div class="interactive-controls">
+        <div class="dataset-toggle" id="ds-toggle">
+          <button data-ds="breast" class="active">乳腺癌数据集</button>
+          <button data-ds="stock">股票次日涨跌</button>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="rocChart"></canvas></div>
+      <div class="chart-note" id="roc-note"></div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:24px">
+      <div class="panel__title">混淆矩阵（各数据集最优模型）</div>
+      <div class="panel__desc">绿格为正确预测（TP/TN），红格为误判（FP/FN）。正类：乳腺癌=良性，股票=上涨。</div>
+      <div class="cm-wrap">
+        <div class="cm-card" id="cm-breast"></div>
+        <div class="cm-card" id="cm-stock"></div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:24px">
+      <div class="panel__title">AUC 对比表</div>
+      <div class="panel__desc">两类数据集上三类模型的 AUC。<span class="ac">≥0.8</span> 绿、<span class="ac">0.5–0.8</span> 琥珀、<span class="ac">&lt;0.5</span> 红。</div>
+      <table class="auc-table" id="auc-table"></table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 结论 ===== -->
+<div id="concl-top"></div>
+<section>
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">PART IV · 结论</div>
+      <h2 class="sec-title">结论与启示</h2>
+    </div>
+    <div class="conclusion reveal">
+      <p>本报告系统梳理了<span class="ac">逻辑回归、决策树、随机森林</span>三类分类算法的原理，并介绍了<span class="ac">混淆矩阵、ROC 曲线与 AUC</span>等评价指标。实证以乳腺癌数据集与茅台次日涨跌数据集为例，展示了完整的机器学习建模流程：数据加载 → 训练/测试划分 → 模型训练 → AUC 计算 → ROC 曲线绘制。</p>
+      <p>实验表明：在<span class="ac">特征—标签关系明确</span>的医学数据上，三类模型均取得极高 AUC（逻辑回归最优 0.9954），随机森林与逻辑回归明显优于决策树；而在<span class="ac">金融市场</span>中，仅凭日行情技术指标的次日涨跌预测 AUC 仅接近 0.5（决策树最优 0.5635），印证了市场噪声与有效市场假说。</p>
+      <p>这提示在量化交易中应用机器学习时，需要引入<span class="ac">更丰富的特征</span>（基本面、另类数据、文本情绪等）与<span class="ac">更严谨的验证框架</span>（样本外、walk-forward、成本与滑点），方能提升模型的实盘价值。</p>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <p>陈柳萱 · 量化投资策略（TASK5） · AI交易引擎：机器学习算法与场景应用</p>
+  <p>数据与代码见 <a href="https://github.com/cccllllxxx/quant/tree/main/hw5" target="_blank" rel="noopener">GitHub 仓库 hw5/</a> · 本页由 Chart.js 渲染</p>
+</div>
+
+<script>
+const ROC_DATA = {"breast": {"逻辑回归": {"fpr": [0.0, 0.0, 0.0, 0.0238, 0.0238, 0.0476, 0.0476, 0.0714, 0.0714, 0.0952, 0.0952, 0.1429, 0.1429, 0.1667, 0.1667, 0.1905, 0.1905, 0.2143, 0.2143, 0.2619, 0.2619, 0.2857, 0.2857, 0.3333, 0.3333, 0.3571, 0.3571, 0.4048, 0.4048, 0.4286, 0.4286, 0.4524, 0.4524, 0.4762, 0.4762, 0.5, 0.5, 0.5238, 0.5238, 0.7143, 0.7143, 0.7381, 0.7381, 0.8333, 0.8333, 1.0], "tpr": [0.0, 0.0139, 0.0417, 0.0417, 0.1528, 0.1528, 0.25, 0.25, 0.3472, 0.3472, 0.5139, 0.5139, 0.5278, 0.5278, 0.5417, 0.5417, 0.5694, 0.5694, 0.5972, 0.5972, 0.6944, 0.6944, 0.7083, 0.7083, 0.7222, 0.7222, 0.75, 0.75, 0.8333, 0.8333, 0.8611, 0.8611, 0.875, 0.875, 0.9028, 0.9028, 0.9167, 0.9167, 0.9306, 0.9306, 0.9583, 0.9583, 0.9861, 0.9861, 1.0, 1.0]}, "决策树": {"fpr": [0.0, 0.0952, 1.0], "tpr": [0.0, 0.9722, 1.0]}, "随机森林": {"fpr": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0238, 0.0238, 0.0238, 0.0238, 0.0238, 0.0238, 0.0238, 0.0238, 0.0714, 0.0714, 0.0714, 0.1429, 0.1905, 0.2143, 0.3095, 0.3571, 0.4048, 0.4286, 0.5, 0.5476, 0.5952, 0.619, 0.6667, 0.6905, 0.6905, 0.7381, 0.8333, 0.881, 1.0], "tpr": [0.0, 0.0139, 0.0278, 0.125, 0.1667, 0.2222, 0.2361, 0.2917, 0.3333, 0.5694, 0.5833, 0.625, 0.6806, 0.7639, 0.7917, 0.8194, 0.9167, 0.9167, 0.9444, 0.9583, 0.9583, 0.9722, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 0.9861, 1.0, 1.0, 1.0, 1.0, 1.0]}}, "stock": {"逻辑回归": {"fpr": [0.0, 0.0, 0.011, 0.011, 0.0659, 0.0659, 0.0989, 0.0989, 0.1099, 0.1099, 0.1758, 0.1758, 0.1868, 0.1868, 0.2308, 0.2308, 0.2418, 0.2418, 0.2527, 0.2527, 0.2857, 0.2857, 0.3187, 0.3187, 0.3516, 0.3516, 0.3736, 0.3736, 0.4066, 0.4066, 0.4176, 0.4176, 0.4835, 0.4835, 0.5055, 0.5055, 0.5165, 0.5165, 0.5385, 0.5385, 0.5714, 0.5714, 0.5824, 0.5824, 0.6044, 0.6044, 0.6154, 0.6154, 0.6264, 0.6264, 0.6484, 0.6484, 0.6923, 0.6923, 0.7143, 0.7143, 0.7582, 0.7582, 0.7692, 0.7692, 0.7912, 0.7912, 0.8022, 0.8022, 0.8352, 0.8352, 0.8462, 0.8462, 0.8681, 0.8681, 0.8791, 0.8791, 0.9121, 0.9121, 0.956, 0.956, 0.989, 0.989, 1.0, 1.0], "tpr": [0.0, 0.0135, 0.0135, 0.0405, 0.0405, 0.1081, 0.1081, 0.1351, 0.1351, 0.1622, 0.1622, 0.1892, 0.1892, 0.2027, 0.2027, 0.2297, 0.2297, 0.2432, 0.2432, 0.2568, 0.2568, 0.2838, 0.2838, 0.3243, 0.3243, 0.3378, 0.3378, 0.3514, 0.3514, 0.3649, 0.3649, 0.3919, 0.3919, 0.4189, 0.4189, 0.4459, 0.4459, 0.473, 0.473, 0.5, 0.5, 0.527, 0.527, 0.6081, 0.6081, 0.6622, 0.6622, 0.6892, 0.6892, 0.7027, 0.7027, 0.7432, 0.7432, 0.7703, 0.7703, 0.7973, 0.7973, 0.8243, 0.8243, 0.8378, 0.8378, 0.8514, 0.8514, 0.8784, 0.8784, 0.8919, 0.8919, 0.9054, 0.9054, 0.9189, 0.9189, 0.9459, 0.9459, 0.9595, 0.9595, 0.973, 0.973, 0.9865, 0.9865, 1.0]}, "决策树": {"fpr": [0.0, 0.4396, 0.4615, 0.4835, 0.4835, 0.5385, 0.6044, 0.6154, 0.6484, 1.0], "tpr": [0.0, 0.3649, 0.3784, 0.4189, 0.4324, 0.4865, 0.5405, 0.5811, 0.6486, 1.0]}, "随机森林": {"fpr": [0.0, 0.011, 0.044, 0.044, 0.0549, 0.0769, 0.0989, 0.1099, 0.1209, 0.1319, 0.1538, 0.1648, 0.1868, 0.1868, 0.2088, 0.2198, 0.2418, 0.2527, 0.2527, 0.2637, 0.2967, 0.3077, 0.3297, 0.3407, 0.3516, 0.3736, 0.3846, 0.4066, 0.4286, 0.4505, 0.4505, 0.4725, 0.4945, 0.4945, 0.5055, 0.5165, 0.5495, 0.5824, 0.5934, 0.6484, 0.6703, 0.7253, 0.7473, 0.7582, 0.8132, 0.8352, 0.8462, 0.8462, 0.8571, 0.8681, 0.8791, 0.9011, 0.9121, 0.9121, 0.9341, 0.9341, 0.9451, 0.9451, 0.9451, 0.967, 0.967, 0.978, 0.978, 0.989, 0.989, 1.0], "tpr": [0.0, 0.0135, 0.0135, 0.027, 0.0405, 0.0405, 0.0676, 0.0811, 0.1081, 0.1622, 0.1757, 0.2027, 0.2162, 0.2297, 0.2297, 0.2432, 0.2432, 0.2703, 0.2838, 0.3108, 0.3108, 0.3243, 0.3378, 0.3378, 0.3649, 0.3919, 0.4189, 0.4189, 0.4189, 0.4189, 0.4324, 0.4595, 0.4595, 0.473, 0.473, 0.5, 0.5405, 0.5676, 0.5811, 0.5946, 0.6081, 0.6351, 0.6486, 0.6622, 0.6892, 0.6892, 0.7027, 0.7162, 0.7297, 0.7703, 0.7838, 0.8108, 0.8378, 0.8514, 0.8514, 0.8784, 0.8784, 0.8919, 0.9189, 0.9189, 0.9459, 0.9459, 0.973, 0.9865, 1.0, 1.0]}}};
+const RESULTS = {"breast": {"n_train": 455, "n_test": 114, "auc": {"逻辑回归": 0.9954, "决策树": 0.9147, "随机森林": 0.9932}, "cm": {"逻辑回归": [[41, 1], [1, 71]], "决策树": [[39, 3], [7, 65]], "随机森林": [[39, 3], [2, 70]]}, "report": {"逻辑回归": {"0": {"precision": 0.9761904761904762, "recall": 0.9761904761904762, "f1-score": 0.9761904761904762, "support": 42.0}, "1": {"precision": 0.9861111111111112, "recall": 0.9861111111111112, "f1-score": 0.9861111111111112, "support": 72.0}, "accuracy": 0.9824561403508771, "macro avg": {"precision": 0.9811507936507937, "recall": 0.9811507936507937, "f1-score": 0.9811507936507937, "support": 114.0}, "weighted avg": {"precision": 0.9824561403508771, "recall": 0.9824561403508771, "f1-score": 0.9824561403508771, "support": 114.0}}, "决策树": {"0": {"precision": 0.8478260869565217, "recall": 0.9285714285714286, "f1-score": 0.8863636363636364, "support": 42.0}, "1": {"precision": 0.9558823529411765, "recall": 0.9027777777777778, "f1-score": 0.9285714285714286, "support": 72.0}, "accuracy": 0.9122807017543859, "macro avg": {"precision": 0.9018542199488491, "recall": 0.9156746031746033, "f1-score": 0.9074675324675325, "support": 114.0}, "weighted avg": {"precision": 0.9160721496836722, "recall": 0.9122807017543859, "f1-score": 0.9130211893369787, "support": 114.0}}, "随机森林": {"0": {"precision": 0.9512195121951219, "recall": 0.9285714285714286, "f1-score": 0.9397590361445783, "support": 42.0}, "1": {"precision": 0.958904109589041, "recall": 0.9722222222222222, "f1-score": 0.9655172413793104, "support": 72.0}, "accuracy": 0.956140350877193, "macro avg": {"precision": 0.9550618108920814, "recall": 0.9503968253968254, "f1-score": 0.9526381387619444, "support": 114.0}, "weighted avg": {"precision": 0.9560729421281235, "recall": 0.956140350877193, "f1-score": 0.9560273762928302, "support": 114.0}}}, "best_model": "逻辑回归"}, "stock": {"n_train": 660, "n_test": 165, "auc": {"逻辑回归": 0.5408, "决策树": 0.5635, "随机森林": 0.5133}, "cm": {"逻辑回归": [[76, 15], [57, 17]], "决策树": [[62, 29], [44, 30]], "随机森林": [[57, 34], [49, 25]]}, "report": {"逻辑回归": {"0": {"precision": 0.5714285714285714, "recall": 0.8351648351648352, "f1-score": 0.6785714285714286, "support": 91.0}, "1": {"precision": 0.53125, "recall": 0.22972972972972974, "f1-score": 0.32075471698113206, "support": 74.0}, "accuracy": 0.5636363636363636, "macro avg": {"precision": 0.5513392857142857, "recall": 0.5324472824472825, "f1-score": 0.4996630727762803, "support": 165.0}, "weighted avg": {"precision": 0.553409090909091, "recall": 0.5636363636363636, "f1-score": 0.5180960548885077, "support": 165.0}}, "决策树": {"0": {"precision": 0.5849056603773585, "recall": 0.6813186813186813, "f1-score": 0.6294416243654822, "support": 91.0}, "1": {"precision": 0.5084745762711864, "recall": 0.40540540540540543, "f1-score": 0.45112781954887216, "support": 74.0}, "accuracy": 0.5575757575757576, "macro avg": {"precision": 0.5466901183242725, "recall": 0.5433620433620434, "f1-score": 0.5402847219571771, "support": 165.0}, "weighted avg": {"precision": 0.5506274772024692, "recall": 0.5575757575757576, "f1-score": 0.5494705846295481, "support": 165.0}}, "随机森林": {"0": {"precision": 0.5377358490566038, "recall": 0.6263736263736264, "f1-score": 0.5786802030456852, "support": 91.0}, "1": {"precision": 0.423728813559322, "recall": 0.33783783783783783, "f1-score": 0.37593984962406013, "support": 74.0}, "accuracy": 0.49696969696969695, "macro avg": {"precision": 0.4807323313079629, "recall": 0.4821057321057321, "f1-score": 0.4773100263348727, "support": 165.0}, "weighted avg": {"precision": 0.48660542101539866, "recall": 0.49696969696969695, "f1-score": 0.48775422635962307, "support": 165.0}}}, "best_model": "决策树"}};
+
+const MODEL_COLORS = {"逻辑回归":"#00e5ff","决策树":"#ffb300","随机森林":"#a07cff"};
+const POS_LABEL = {"breast":"良性(1)","stock":"上涨(1)"};
+const DS_NAME = {"breast":"乳腺癌数据集","stock":"股票次日涨跌数据集"};
+
+// ---- 混淆矩阵 ----
+function renderCM(cardId, ds, model){
+  const cm = RESULTS[ds]["cm"][model];
+  const auc = RESULTS[ds]["auc"][model];
+  const [tn,fp] = cm[0]; const [fn,tp] = cm[1];
+  document.getElementById(cardId).innerHTML = `
+    <h4>${DS_NAME[ds]} · ${model}</h4>
+    <div class="sub">AUC = ${auc.toFixed(4)} ｜ 正类 = ${POS_LABEL[ds]}</div>
+    <div class="cm-grid">
+      <div class="cm-cell cm-tn"><div class="n">${tn}</div><div class="l">TN 真负</div><div class="r">预测0·实际0</div></div>
+      <div class="cm-cell cm-fp"><div class="n">${fp}</div><div class="l">FP 假正</div><div class="r">预测1·实际0</div></div>
+      <div class="cm-cell cm-fn"><div class="n">${fn}</div><div class="l">FN 假负</div><div class="r">预测0·实际1</div></div>
+      <div class="cm-cell cm-tp"><div class="n">${tp}</div><div class="l">TP 真正</div><div class="r">预测1·实际1</div></div>
+    </div>
+    <div class="cm-axis">行=真实标签，列=预测标签</div>`;
+}
+renderCM("cm-breast","breast",RESULTS["breast"]["best_model"]);
+renderCM("cm-stock","stock",RESULTS["stock"]["best_model"]);
+
+// ---- AUC 表 ----
+(function(){
+  const models = ["逻辑回归","决策树","随机森林"];
+  let html = `<tr><th>模型</th><th>乳腺癌 AUC</th><th>股票 AUC</th></tr>`;
+  models.forEach(m=>{
+    const aB = RESULTS["breast"]["auc"][m], aS = RESULTS["stock"]["auc"][m];
+    const clsB = aB>=0.8?"auc-good":(aB>=0.5?"auc-mid":"auc-bad");
+    const clsS = aS>=0.8?"auc-good":(aS>=0.5?"auc-mid":"auc-bad");
+    html += `<tr><td>${m}</td><td class="num ${clsB}">${aB.toFixed(4)}</td><td class="num ${clsS}">${aS.toFixed(4)}</td></tr>`;
+  });
+  document.getElementById("auc-table").innerHTML = html;
+})();
+
+// ---- ROC 图 ----
+let curDs = "breast";
+const ctx = document.getElementById("rocChart").getContext("2d");
+const diag = {label:"随机(0.5)", data:[[0,0],[1,1]], borderColor:"rgba(138,154,174,0.5)", borderDash:[6,6], pointRadius:0, borderWidth:1.5, fill:false};
+let chart = new Chart(ctx,{
+  type:"line",
+  data:{datasets:[diag]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:600},
+    scales:{
+      x:{min:0,max:1,title:{display:true,text:"假正率 FPR",color:"#8a9aae"},
+         grid:{color:"rgba(120,160,200,0.08)"},ticks:{color:"#566578"}},
+      y:{min:0,max:1.02,title:{display:true,text:"真正率 TPR",color:"#8a9aae"},
+         grid:{color:"rgba(120,160,200,0.08)"},ticks:{color:"#566578"}}
+    },
+    plugins:{
+      legend:{labels:{color:"#e8eef5",usePointStyle:false,boxWidth:24,font:{size:12}}},
+      tooltip:{callbacks:{label:c=>c.dataset.label}}
+    }
+  }
+});
+function loadRoc(ds){
+  const datasets = [diag];
+  Object.keys(ROC_DATA[ds]).forEach(m=>{
+    const d = ROC_DATA[ds][m];
+    const pts = d.fpr.map((x,i)=>[x,d.tpr[i]]);
+    datasets.push({
+      label:`${m} (AUC=${RESULTS[ds]["auc"][m].toFixed(4)})`,
+      data:pts, borderColor:MODEL_COLORS[m], backgroundColor:MODEL_COLORS[m],
+      borderWidth:2, pointRadius:0, tension:0.25, fill:false
+    });
+  });
+  chart.data.datasets = datasets;
+  chart.update();
+  const best = RESULTS[ds]["best_model"];
+  document.getElementById("roc-note").innerHTML =
+    `<span class="ac">${DS_NAME[ds]}</span>：最优模型 <span class="ac">${best}</span>，` +
+    `AUC = <span class="ac">${RESULTS[ds]["auc"][best].toFixed(4)}</span>。` +
+    (RESULTS[ds]["auc"][best]>=0.8
+      ? " 曲线紧贴左上角，区分能力强。"
+      : " 曲线贴近对角线，区分能力弱，接近随机猜测——与金融噪声一致。");
+}
+loadRoc(curDs);
+document.querySelectorAll("#ds-toggle button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("#ds-toggle button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    curDs = btn.dataset.ds; loadRoc(curDs);
+  });
+});
+
+// ---- 滚动揭示 ----
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target);}});
+},{threshold:0.1});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
